@@ -153,6 +153,13 @@ class ModuleServerTests(unittest.TestCase):
                     guide = json.loads((await s.call_tool('workspace_guide', {})).content[0].text)
                     self.assertTrue(guide['ok'], guide)
                     self.assertEqual(guide['result']['modules'], ['core', 'fs', 'longform'])
+                    architecture = guide['result']['architecture']
+                    self.assertEqual(architecture['model'], 'base_plus_extensions')
+                    self.assertEqual(architecture['base']['module_id'], 'core')
+                    self.assertEqual(
+                        [item['module_id'] for item in architecture['extensions']],
+                        ['fs', 'longform'],
+                    )
                     self.assertEqual(guide['result']['quick_start'][0]['tool'], 'workspace_guide')
                     tools = [x['tool'] for x in guide['result']['quick_start']]
                     self.assertIn('writing_resume', tools)

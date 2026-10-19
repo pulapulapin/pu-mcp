@@ -2,10 +2,10 @@
 from __future__ import annotations
 import json
 from mcp.server.mcpserver import MCPServer
+from extension_registry import AVAILABLE, PUBLIC_MODULES
 from novel_version import VERSION
 
-AVAILABLE = ('core', 'fs', 'longform')
-OWNER_MODULES = ('core', 'fs', 'longform')
+OWNER_MODULES = PUBLIC_MODULES
 PRESETS = {
     'workspace': ('core',),
     'owner': OWNER_MODULES,

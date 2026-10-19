@@ -10,7 +10,7 @@ def main():
     parser = argparse.ArgumentParser(description='PuKnowledge traceable context and evidence MCP')
     parser.add_argument('--config', type=Path, help='local JSON configuration')
     parser.add_argument('--check-config', action='store_true')
-    parser.add_argument('--modules', default='', help='comma-separated: core,fs,longform')
+    parser.add_argument('--modules', default='', help='core is the base; optional extensions: fs,longform')
     args = parser.parse_args()
     if args.config:
         os.environ['PUKNOWLEDGE_CONFIG'] = str(args.config.expanduser().resolve())

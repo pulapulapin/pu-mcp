@@ -1,4 +1,5 @@
 """Single obvious entry: what is loaded and what to call first."""
+from extension_registry import describe_modules
 from novel_version import VERSION
 
 MODULE_GUIDE = {
@@ -43,6 +44,7 @@ def build_guide(modules):
         'service': 'PuKnowledge',
         'version': VERSION,
         'modules': loaded,
+        'architecture': describe_modules(loaded),
         'quick_start': quick,
         'modules_detail': detail,
         'snapshot_contract': {

@@ -2,6 +2,8 @@
 
 `workspace_guide` 是首选入口。服务返回统一的 `{ok,result}` 或 `{ok:false,error}` JSON。
 
+`workspace_guide.architecture` 会返回 `base_plus_extensions` 模型、固定基础和当前实际加载的扩展。
+
 | 模块 | 工具组 |
 |---|---|
 | core | `workspace_*`、`task_*`、`source_*`、`evidence_*`、`capture_*`、`dataset_*`、`schema_*`、`record_*`、`relation_*`、`import_*` |

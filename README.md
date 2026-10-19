@@ -2,6 +2,8 @@
 
 **面向长期研究与创作项目的、可追溯 AI 工作上下文与证据管理 MCP。**
 
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
+
 PuKnowledge 把聊天模型作为推理入口，把本地 MCP 作为可核对的工作台。任务方向、来源版本、证据引用、结构化知识和长文快照保存在用户指定的本地目录，换聊天窗口或 MCP 客户端后仍可按明确项目恢复。
 
 ## 能力
@@ -11,6 +13,8 @@ PuKnowledge 把聊天模型作为推理入口，把本地 MCP 作为可核对的
 - `longform`：长文项目状态、草稿版本、参考书索引和写作快照。
 
 服务不默认选择项目，不自动导入聊天历史，不遍历未授权目录，也不执行资料中的指令。写入流程使用预览、版本基线、内容指纹和幂等键。
+
+架构采用“**通用基础 + 按需扩展 + 领域数据包**”：`core` 是固定基础，`fs` 和 `longform` 按需求加载。小说共享通用长文能力；D&D 等具体规则体系应作为有版本、有证据的领域数据，而不是基础 API 的硬编码。详见[基础与扩展架构](docs/EXTENSION-ARCHITECTURE.md)。
 
 ## 安装
 
@@ -74,4 +78,6 @@ cp config/workspace.example.json config/workspace.local.json
 
 ## 发布状态
 
-当前版本为 `0.3.3` 开发预览。仓库尚未选择开源许可证；在许可证文件加入前，代码公开可见不等于获得开源许可。安全边界面向单用户、受信任的本地工作区，不是多租户权限系统。
+当前版本为 `0.3.3` 开发预览。程序代码采用 [Apache License 2.0](LICENSE)；该许可不自动覆盖用户数据库、小说正文、研究资料、项目文件或媒体内容。可选 Magpie/PuCatch 以各自仓库的许可为准。安全边界面向单用户、受信任的本地工作区，不是多租户权限系统。
+
+安全问题请按 [SECURITY.md](SECURITY.md) 私下报告；参与开发见 [CONTRIBUTING.md](CONTRIBUTING.md)。

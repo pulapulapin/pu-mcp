@@ -3,12 +3,12 @@ import json
 import re
 import os
 from pathlib import Path
+from extension_registry import AVAILABLE as MODULE_NAMES
 
 ROOT = Path(__file__).resolve().parent.parent
 SOURCE_CHECKOUT = (ROOT / 'novels/projects').is_dir()
 HOME_DATA = Path.home() / '.local/share/novel-workbench'
 PUBLIC_HOME = Path.home() / '.local/share/pu-knowledge'
-MODULE_NAMES = ('core', 'fs', 'longform')
 
 def load_settings(neutral=False):
     old_config=os.environ.get('NOVEL_WORKBENCH_CONFIG','')
