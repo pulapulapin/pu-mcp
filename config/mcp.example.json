@@ -1,0 +1,20 @@
+{
+  "data_dir": "../.local/pu-knowledge",
+  "projects_dir": "../workspace/longform-projects",
+  "projects": {},
+  "books_root": "../workspace/reference-books",
+  "collections": {
+    "shared-research": "../workspace/research"
+  },
+  "research_roots": ["../workspace/research"],
+  "workspaces": {
+    "sample": {
+      "path": "../workspace/sample",
+      "label": "Sample workspace",
+      "domain": "research",
+      "fs_read": {"enabled": true, "readonly": true}
+    }
+  },
+  "modules": ["core", "fs", "longform"],
+  "capture": {"enabled": false}
+}

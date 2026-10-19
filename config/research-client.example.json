@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "pu-knowledge-workbench": {
+      "command": "/absolute/path/to/venv/bin/python",
+      "args": [
+        "-B",
+        "/absolute/path/to/pu-mcp/scripts/knowledge_entry.py",
+        "--config",
+        "/absolute/path/to/workspace.local.json",
+        "--modules",
+        "core"
+      ]
+    }
+  }
+}

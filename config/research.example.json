@@ -1,0 +1,16 @@
+{
+  "data_dir": "../.local/novel-workbench",
+  "research_projects": {
+    "tooling": {
+      "path": "../research-projects/tooling",
+      "label": "工具能力调研",
+      "domain": "tool-capabilities"
+    }
+  },
+  "research_roots": [
+    "../research-projects/tooling"
+  ],
+  "pucatch": {
+    "enabled": false
+  }
+}

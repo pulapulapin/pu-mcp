@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pu-knowledge-workbench"
+version = "0.3.3"
+description = "Traceable AI work context and evidence management for long-running research and creative projects"
+requires-python = ">=3.11"
+dependencies = ["mcp>=2,<3", "pydantic>=2,<3"]
+
+[project.scripts]
+pu-knowledge-workbench = "knowledge_entry:main"
+pu-knowledge-http = "knowledge_http:main"
+
+[tool.setuptools]
+package-dir = {"" = "scripts"}
+py-modules = ["fs_tools", "knowledge_api", "knowledge_data", "knowledge_entry", "knowledge_http", "knowledge_import", "knowledge_models", "knowledge_server", "knowledge_tools", "longform_tools", "module_server", "novel_books", "novel_capture", "novel_config", "novel_conversation", "novel_evidence", "novel_handoff", "novel_harness", "novel_library", "novel_mcp", "novel_research", "novel_research_cards", "novel_session", "novel_store", "novel_version", "novel_voice", "novel_work_search", "novel_workbench", "pucatch_client", "research_resume", "research_tools", "research_traffic", "research_workspace", "workspace_fs", "workspace_guide"]

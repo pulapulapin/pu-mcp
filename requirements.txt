@@ -1,0 +1,7 @@
+# 小红书内容工作流 MVP
+# 必选：无（选图、整理资料、生成文案、run_workflow 仅用标准库）
+# 可选：批量修图需要 Pillow；公众号发布需要 requests；数据简报需要 pandas
+Pillow>=10.0.0
+requests>=2.28.0
+pandas>=2.0.0
+mcp>=2,<3

@@ -1,0 +1,17 @@
+# Copy the relevant section into your Codex configuration and replace placeholders.
+# Keep the real local config untracked.
+
+[mcp_servers.pu-knowledge-workbench]
+command = "<ABSOLUTE_PATH_TO_REPO>/.venv/bin/python"
+args = [
+  "-B",
+  "<ABSOLUTE_PATH_TO_REPO>/scripts/knowledge_entry.py",
+  "--config",
+  "<ABSOLUTE_PATH_TO_CONFIG>",
+  "--modules",
+  "core,fs,longform",
+]
+cwd = "<ABSOLUTE_PATH_TO_REPO>"
+required = true
+startup_timeout_sec = 30
+tool_timeout_sec = 120

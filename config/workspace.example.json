@@ -1,0 +1,9 @@
+{
+  "data_dir": "../.local/pu-knowledge",
+  "workspaces": {
+    "sample": {"path": "../workspace/sample", "label": "示例项目", "domain": "research"}
+  },
+  "research_roots": ["../workspace/sample"],
+  "modules": ["core"],
+  "capture": {"enabled": false}
+}

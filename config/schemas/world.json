@@ -1,0 +1,18 @@
+{
+  "pack_id": "world-knowledge",
+  "pack_version": "0.1",
+  "notice": "全部为合成工程样例，不表示任何真实作品或游戏规则。导入后仍为候选，不确认Canon。",
+  "dataset_id": "sample-world-rules",
+  "dataset": {"title": "合成世界规则参考", "scope": "global", "purpose": "reference"},
+  "record_type": "progression",
+  "schema": {
+    "fields": {
+      "entity": {"type": "string", "required": true},
+      "level": {"type": "integer", "required": true, "minimum": 1, "maximum": 20, "unit": "level"},
+      "value": {"type": "number", "required": true, "unit": "synthetic_points"},
+      "formula": {"type": "string"}
+    },
+    "allowed_relations": ["depends_on", "adopts"]
+  },
+  "records": [{"id": "synthetic-growth", "body": {"record_type": "progression", "schema_revision": 1, "values": {"entity": "synthetic-class", "level": 1, "value": 2.0, "formula": "synthetic_points = level * 2"}, "status": "candidate", "evidence": []}}]
+}

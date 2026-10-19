@@ -1,0 +1,20 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "pu-knowledge-workbench",
+  "version": "0.3.3",
+  "description": "Traceable AI work context and evidence management with a local MCP runtime.",
+  "author": {"name": "PuKnowledge Contributors"},
+  "extensions": {
+    "com.openai": {
+      "onboardingSkill": "./skills/setup/SKILL.md",
+      "requires_local_executor": true,
+      "interface": {
+        "displayName": "PuKnowledge Local",
+        "shortDescription": "本地证据、任务与知识工作台",
+        "developerName": "PuKnowledge Contributors",
+        "category": "Productivity",
+        "capabilities": ["Read", "Write"]
+      }
+    }
+  }
+}

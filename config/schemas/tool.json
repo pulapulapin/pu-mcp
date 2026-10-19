@@ -1,0 +1,19 @@
+{
+  "pack_id": "tool-capability-research",
+  "pack_version": "0.1",
+  "notice": "合成工具样例，不是PuCatch实际能力验收。真实证据须另行登记并精确绑定。",
+  "dataset_id": "sample-tool-capabilities",
+  "dataset": {"title": "合成工具能力参考", "scope": "global", "purpose": "reference"},
+  "record_type": "capability",
+  "schema": {
+    "fields": {
+      "provider": {"type": "string", "required": true},
+      "operation": {"type": "string", "required": true},
+      "transport": {"type": "string", "required": true, "enum": ["http", "cli", "sdk", "mcp"]},
+      "networked": {"type": "boolean", "required": true},
+      "verification": {"type": "string", "required": true, "enum": ["declared", "sample_verified", "failed"]}
+    },
+    "allowed_relations": ["provided_by", "verified_by", "adopts"]
+  },
+  "records": [{"id": "synthetic-probe", "body": {"record_type": "capability", "schema_revision": 1, "values": {"provider": "synthetic-provider", "operation": "probe", "transport": "http", "networked": true, "verification": "declared"}, "status": "candidate", "evidence": []}}]
+}

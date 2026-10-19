@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "pu-knowledge-workbench": {
+      "command": "<ABSOLUTE_PATH_TO_REPO>/.venv/bin/python",
+      "args": [
+        "-B",
+        "<ABSOLUTE_PATH_TO_REPO>/scripts/knowledge_entry.py",
+        "--config",
+        "<ABSOLUTE_PATH_TO_CONFIG>",
+        "--modules",
+        "core,fs,longform"
+      ],
+      "env": {
+        "PUKNOWLEDGE_CONFIG": "<ABSOLUTE_PATH_TO_CONFIG>"
+      }
+    }
+  }
+}
