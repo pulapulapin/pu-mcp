@@ -11,9 +11,14 @@ def resume_task(self,project,session_id='',inferred=None):
     has_saved_task=bool(backup or checkpoint)
     stage=context['stage'] if context else None if required or has_saved_task else inferred['label']
     if checkpoint and not backup and not required:selection['warnings'].append('旧检查点无任务阶段，阶段未知；项目阶段单独返回')
-    if backup and checkpoint and checkpoint['task']!=backup['task']:selection['warnings'].append('会话任务与旧检查点不同，采用选定快照；检查点仅供历史核对')
+    checkpoint_view=checkpoint
+    if backup and checkpoint and checkpoint['task']!=backup['task']:
+        selection['warnings'].append('会话任务与旧检查点不同，采用选定快照；检查点仅供历史核对')
+        checkpoint_view={key:checkpoint.get(key) for key in ('project','revision','task','created') if key in checkpoint}
+        checkpoint_view.update({'historical':True,'content_omitted':True,
+            'notice':'旧检查点与当前任务不同；完整内容仍保留在数据库，但默认恢复响应不展开。'})
     if context and inferred['label'] and context['stage']!=inferred['label']:selection['warnings'].append('任务阶段与项目配置阶段不同，任务阶段采用快照；project_stage仅供核对')
-    return {'project':project,'path':str(self.project(project)),'checkpoint':checkpoint,'session_backup':backup,
+    return {'project':project,'path':str(self.project(project)),'checkpoint':checkpoint_view,'session_backup':backup,
         'task':None if required else backup['task'] if backup else checkpoint['task'] if checkpoint else inferred['instruction'],
         'activity':activity,
         'automatic_development_allowed':activity!='paused' and not required and (bool(context and context['state']=='active' and not selection['historical']) if backup else not has_saved_task and bool(inferred['instruction'])),

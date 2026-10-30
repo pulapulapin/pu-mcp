@@ -25,7 +25,10 @@ as well as legacy `kind`/`object_id`, reject conflicting aliases and foreign
 project declarations, and remain version pinned. Projects with an explicit
 recovery manifest no longer receive the legacy JSON story view in default
 `writing_resume`/`writing_get_context` responses; legacy structure remains
-available through separate structure tools. Public synthetic suite: 275 passed.
+available through separate structure tools. A checkpoint that conflicts with
+the selected current session is returned as bounded historical metadata rather
+than injecting its old summary, next step and evidence into default recovery;
+the stored history remains unchanged. Public synthetic suite: 275 passed.
 
 2026-10-30 parity batch: generic Prompt resolution, writing-context recovery,
 source selection/ranges/maps/fact anchors, quote verification and neutral corpus
