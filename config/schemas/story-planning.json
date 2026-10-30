@@ -1,0 +1,68 @@
+{
+  "description": "Synthetic schema pack only; explicitly preview/save a project-private model dataset and this schema before use. No automatic initialization.",
+  "record_type": "story_node",
+  "schema": {
+    "fields": {
+      "kind": {
+        "type": "string",
+        "required": true,
+        "enum": [
+          "volume",
+          "unit",
+          "chapter",
+          "scene",
+          "event",
+          "character",
+          "relationship_state",
+          "character_state",
+          "thread",
+          "setup",
+          "location",
+          "decision"
+        ]
+      },
+      "title": {
+        "type": "string",
+        "required": true
+      },
+      "summary": {
+        "type": "string",
+        "required": true
+      },
+      "story_state": {
+        "type": "string",
+        "required": true,
+        "enum": [
+          "candidate"
+        ]
+      },
+      "goal": {
+        "type": "string"
+      },
+      "obstacle": {
+        "type": "string"
+      },
+      "action": {
+        "type": "string"
+      },
+      "turn": {
+        "type": "string"
+      },
+      "outcome": {
+        "type": "string"
+      }
+    },
+    "allowed_relations": [
+      "contains",
+      "depends_on",
+      "precedes",
+      "participates_in",
+      "occurs_at",
+      "establishes",
+      "requires_state",
+      "pays_off",
+      "advances",
+      "supersedes"
+    ]
+  }
+}

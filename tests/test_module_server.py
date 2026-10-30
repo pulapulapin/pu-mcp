@@ -5,7 +5,7 @@ from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 
 ROOT = Path(__file__).resolve().parents[1]
-PYTHON = str(ROOT / '.venv/bin/python')
+PYTHON = sys.executable
 CORE = {
     'workspace_guide', 'workspace_get_status', 'workspace_list_projects', 'task_resume', 'task_preview_snapshot',
     'task_save_snapshot', 'task_list_snapshots', 'task_read_snapshot', 'tool_list_capabilities',

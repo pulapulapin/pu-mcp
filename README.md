@@ -81,3 +81,14 @@ cp config/workspace.example.json config/workspace.local.json
 当前版本为 `0.3.3` 开发预览。程序代码采用 [Apache License 2.0](LICENSE)；该许可不自动覆盖用户数据库、小说正文、研究资料、项目文件或媒体内容。可选 Magpie/PuCatch 以各自仓库的许可为准。安全边界面向单用户、受信任的本地工作区，不是多租户权限系统。
 
 安全问题请按 [SECURITY.md](SECURITY.md) 私下报告；参与开发见 [CONTRIBUTING.md](CONTRIBUTING.md)。
+
+### Candidate story planning (development)
+
+With `longform` enabled, `story_plan_get`, `story_plan_preview` and
+`story_plan_save` manage a bounded candidate graph using existing private
+Dataset/Schema/Record/Relation versions. Initialize an explicitly authorized
+project-private model dataset and the [schema pack](config/schemas/story-planning.json)
+through the existing preview/save tools. Nothing is initialized automatically.
+This feature does not modify manuscripts or Canon. Chapter-context aggregation,
+semantic continuity and actual Chat host acceptance are not yet delivered.
+See the [design and boundaries](docs/design/story-planning.md).

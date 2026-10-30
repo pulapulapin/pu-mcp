@@ -80,6 +80,8 @@ class _AliasRegistration:
 def register_longform(server, aliases=False):
     """Register writing/draft/library tools. When aliases=True also expose novel_* names."""
     target = _AliasRegistration(server, LONGFORM_ALIASES) if aliases else server
+    from story_planning_tools import register_story_planning
+    register_story_planning(target)
     read = ToolAnnotations(read_only_hint=True)
     write = ToolAnnotations(read_only_hint=False, destructive_hint=False, idempotent_hint=True)
 

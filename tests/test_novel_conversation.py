@@ -167,7 +167,7 @@ class ConversationTests(unittest.TestCase):
  def test_real_protocol_new_process_resume_and_readonly_profile(self):asyncio.run(self.protocol())
  async def protocol(self):
   async def run(action):
-   params=StdioServerParameters(command=str(ROOT/'.venv/bin/python'),args=['-B',str(ROOT/'scripts/knowledge_entry.py'),'--modules','core,longform'],env=os.environ.copy(),cwd=str(self.root))
+   params=StdioServerParameters(command=sys.executable,args=['-B',str(ROOT/'scripts/knowledge_entry.py'),'--modules','core,longform'],env=os.environ.copy(),cwd=str(self.root))
    async with stdio_client(params) as (r,w):
     async with ClientSession(r,w) as client:
      await client.initialize();await action(client)

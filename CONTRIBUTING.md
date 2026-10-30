@@ -10,3 +10,13 @@ PuKnowledge 当前是 `0.x` 开发预览。贡献代码按 [Apache License 2.0](
 - 任何写接口都应保留预览、版本基线、指纹与幂等语义。
 - 需求先归入基础、按需扩展、领域数据包或兼容迁移；领域词汇优先进入有版本的 schema，只有新增受限行为或权限边界时才增加 MCP 扩展。
 - 安全问题不要提交公开复现或敏感数据，按 [SECURITY.md](SECURITY.md) 报告。
+
+## Repository and private-project boundary
+
+Maintain reusable MCP code in this repository on feature branches from `main`.
+Never merge private development history into the public repository. Port narrowly
+reviewed source changes and synthetic tests instead. Private manuscripts, outlines,
+project-specific prompts, source inventories, decisions, absolute user paths,
+configuration and host screenshots remain in their private project repositories.
+Check the exact staged files and diff for these materials before a public push.
+Do not infer permission to publish project data from permission to develop MCP.

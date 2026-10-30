@@ -21,6 +21,7 @@ MODULE_GUIDE = {
     'longform': {
         'purpose': '长文/文本项目：方向恢复、交接快照、草稿、参考书',
         'first': ['writing_resume', 'writing_list_snapshots', 'draft_list', 'library_list_books'],
+        'groups': {'candidate_story_graph': ['story_plan_get', 'story_plan_preview', 'story_plan_save']},
     },
 }
 

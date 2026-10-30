@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Add optional longform candidate story graph read/preview/save, reusing private Knowledge datasets and atomic version commits.
+- Report explicit dependency impact paths and stale endpoints without promoting candidates to Canon.
+- Add synthetic 48-chapter and real stdio tests; chapter context and semantic continuity checks remain pending.
+
 ## 0.3.3
 
 - 发布单一中性 MCP 入口 `pu-knowledge-workbench`。

@@ -1,5 +1,6 @@
 """Real MCP protocol with synthetic media and isolated projects; not host acceptance."""
 import asyncio
+import sys
 import hashlib
 import json
 import os
@@ -25,7 +26,7 @@ class EvidenceMCPTests(unittest.TestCase):
                 'data_dir':str(root/'db'),'projects_dir':str(root/'projects'),'research_roots':[str(root)],
                 'workspaces':{p:{'path':str(root/'projects'/p),'label':p,'domain':'research'} for p in ('a','b')},
             }))
-            params=StdioServerParameters(command=str(ROOT/'.venv/bin/python'),args=['-B',str(ROOT/'scripts/knowledge_entry.py'),'--config',str(config)],cwd=str(root),env={**os.environ,'PUKNOWLEDGE_CONFIG':str(config)})
+            params=StdioServerParameters(command=sys.executable,args=['-B',str(ROOT/'scripts/knowledge_entry.py'),'--config',str(config)],cwd=str(root),env={**os.environ,'PUKNOWLEDGE_CONFIG':str(config)})
             for restarted in (False,True):
                 async with stdio_client(params) as (read,write):
                     async with ClientSession(read,write) as session:

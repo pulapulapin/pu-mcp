@@ -1,0 +1,19 @@
+schema_version: 1
+updated: 2026-10-30
+direction: "Public reusable MCP base plus optional extensions; private project content stays outside the repository."
+bundle: general-product
+stage: implementation
+active_capabilities:
+  - explorer
+  - review-agent
+  - writing-plans
+  - executing-plans
+  - systematic-debugging
+  - test-driven-development
+  - receiving-code-review
+  - verification-before-completion
+policy:
+  planning: "required-for-multi-file-or-high-risk-work"
+  review: "once-per-meaningful-change-batch"
+  visual_verification: "when-the-product-has-visible-ui"
+  tdd: "logic-and-regression-behavior"
