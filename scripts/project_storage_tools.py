@@ -32,3 +32,13 @@ def register_project_storage(server):
     def project_storage_verify(project: str) -> str:
         """Compare an existing project shadow database with the current project-owned source closure. Read-only."""
         return call('verify', project=project)
+
+    @server.tool(annotations=ToolAnnotations(read_only_hint=True))
+    def project_storage_sync_preview(project: str) -> str:
+        """Preview an exact refresh of an existing project shadow database, including global dependency replicas. No writes."""
+        return call('sync_preview', project=project)
+
+    @server.tool(annotations=ToolAnnotations(destructive_hint=False))
+    def project_storage_sync(project: str, preview_fingerprint: str) -> str:
+        """Atomically refresh an approved project shadow database and preserve its previous file as a rollback copy. Runtime routing is unchanged."""
+        return call('sync', project=project, preview_fingerprint=preview_fingerprint)

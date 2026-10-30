@@ -26,7 +26,7 @@ class KnowledgeEntryTests(unittest.TestCase):
    async with stdio_client(params) as (r,w):
     async with ClientSession(r,w) as s:
      info=await s.initialize();self.assertEqual(info.server_info.name,'pu-knowledge-workbench')
-     defs=(await s.list_tools()).tools;names={x.name for x in defs};self.assertEqual(len(names),43)
+     defs=(await s.list_tools()).tools;names={x.name for x in defs};self.assertEqual(len(names),45)
      self.assertIn('workspace_guide',names);self.assertIn('task_resume',names);self.assertIn('source_get',names);self.assertIn('tool_list_capabilities',names)
      for t in defs:self.assertNotIn('dnd',json.dumps(t.model_dump(),ensure_ascii=False).lower())
      self.assertFalse(any(n.startswith(('novel_','research_','game_')) for n in names))

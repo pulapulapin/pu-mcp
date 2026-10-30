@@ -9,6 +9,10 @@
   `project_storage_verify`; project rows and pinned research-source dependencies must
   match normalized table fingerprints, SQLite integrity and foreign-key checks before
   a shadow copy succeeds. Runtime routing remains unchanged.
+- Add explicit `project_stores` shadow/active bindings, atomic sync with preserved
+  rollback files, and project-aware routing for drafts, snapshots, private datasets,
+  story graphs and evidence. Global dataset replicas are read-only; shared books and
+  unscoped global operations remain on the central store.
 - Add read-only `story_plan_bootstrap` to return the exact supported Schema Pack,
   a real schema preview fingerprint and save arguments; incompatible nonempty
   datasets are blocked and no schema is saved automatically.

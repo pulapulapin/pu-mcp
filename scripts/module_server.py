@@ -62,9 +62,9 @@ def register_core(server):
     from knowledge_server import PublicRegistration
     from knowledge_tools import register_knowledge
 
-    def call(action):
+    def call(action, project=''):
         try:
-            return json.dumps({'ok': True, 'result': action(ResearchWorkspace(profile='workspace'))}, ensure_ascii=False)
+            return json.dumps({'ok': True, 'result': action(ResearchWorkspace(profile='workspace',store_project=project))}, ensure_ascii=False)
         except Exception as exc:
             return json.dumps({'ok': False, 'error': str(exc)}, ensure_ascii=False)
 
@@ -72,10 +72,10 @@ def register_core(server):
     register_portal(registration, call)
     register_capture(registration, scoped=True)
 
-    def knowledge_call(action):
+    def knowledge_call(action, project=''):
         from knowledge_api import workspace
         try:
-            return json.dumps({'ok': True, 'result': action(workspace())}, ensure_ascii=False)
+            return json.dumps({'ok': True, 'result': action(workspace(project))}, ensure_ascii=False)
         except Exception as exc:
             return json.dumps({'ok': False, 'error': str(exc)}, ensure_ascii=False)
 
@@ -92,9 +92,9 @@ def register_research_compat(server):
     from research_tools import register_evidence, register_portal, register_capture
     from research_workspace import ResearchWorkspace
 
-    def call(action):
+    def call(action, project=''):
         try:
-            return json.dumps({'ok': True, 'result': action(ResearchWorkspace(allow_novel=True))}, ensure_ascii=False)
+            return json.dumps({'ok': True, 'result': action(ResearchWorkspace(allow_novel=True,store_project=project))}, ensure_ascii=False)
         except Exception as exc:
             return json.dumps({'ok': False, 'error': str(exc)}, ensure_ascii=False)
 

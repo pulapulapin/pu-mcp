@@ -9,7 +9,7 @@ from novel_version import VERSION
 from research_resume import resume_task
 
 class ResearchWorkspace:
-    def __init__(self,allow_novel=False,profile=None):
+    def __init__(self,allow_novel=False,profile=None,store_project=''):
         self.profile=profile or ('full' if allow_novel else 'research')
         self.settings=load_settings(neutral=profile=='workspace');self.allowed=dict(self.settings['research_projects'])
         if allow_novel:
@@ -29,8 +29,13 @@ class ResearchWorkspace:
         if self.profile=='workspace':
             for key,path in project_dirs(self.settings).items():
                 self.catalog.setdefault(key,{'path':path,'label':key,'domain':'longform'})
-        self.store=Store(self.settings['data_dir']);self.research_roots=self.settings['research_roots']
-        self.books=Books(self.store,self.settings['books_root']);self.evidence=Evidence(self);self.conversations=Conversations(self)
+        central=Store(self.settings['data_dir'])
+        binding=self.settings.get('project_stores',{}).get(store_project) if store_project else None
+        self.store=Store(binding['path']) if binding and binding['mode']=='active' else central
+        self.store_mode='project' if self.store.path!=central.path else 'shared'
+        self.store_project=store_project if self.store_mode=='project' else ''
+        self.research_roots=self.settings['research_roots']
+        self.books=Books(central,self.settings['books_root']);self.evidence=Evidence(self);self.conversations=Conversations(self)
     def project(self,project):
         identifier(project)
         if project not in self.allowed:raise ValueError('项目不在本研究档显式登记范围内')

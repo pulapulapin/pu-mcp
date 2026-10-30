@@ -42,7 +42,7 @@ def _fail(exc):
 
 
 def _task_context(payload, project):
-    session = Workbench().resume(project)
+    session = Workbench(project_id=project).resume(project)
     return {**payload, 'project_next_task': payload['next_task'],
             'next_task': {'label': session['stage'], 'instruction': session['task'], 'next_step': session['next_step'],
                           'task_id': session['task_id'], 'state': session['task_state'],
@@ -51,9 +51,34 @@ def _task_context(payload, project):
             'next_task_source': session['resume_mode'], 'session': session}
 
 
-def _wb(action):
+def _wb(action, project=''):
     try:
-        return json.dumps({'ok': True, 'result': action(Workbench())}, ensure_ascii=False)
+        return json.dumps({'ok': True, 'result': action(Workbench(project_id=project))}, ensure_ascii=False)
+    except Exception as exc:
+        return json.dumps({'ok': False, 'error': str(exc)}, ensure_ascii=False)
+
+
+def _proposal_wb(action, proposal_id):
+    """Locate an opaque proposal without guessing a project or silently crossing stores."""
+    try:
+        from novel_config import load_settings
+        candidates = [Workbench()]
+        for project, binding in sorted(load_settings().get('project_stores', {}).items()):
+            if binding['mode'] == 'active':
+                candidates.append(Workbench(project_id=project))
+        matches = []
+        seen = set()
+        for workbench in candidates:
+            key = str(workbench.store.path)
+            if key in seen:
+                continue
+            seen.add(key)
+            with workbench.store.connection() as db:
+                if db.execute('SELECT 1 FROM proposals WHERE id=?', (proposal_id,)).fetchone():
+                    matches.append(workbench)
+        if len(matches) != 1:
+            raise ValueError('候选不存在或跨存储重复；请重新发起预览')
+        return json.dumps({'ok': True, 'result': action(matches[0])}, ensure_ascii=False)
     except Exception as exc:
         return json.dumps({'ok': False, 'error': str(exc)}, ensure_ascii=False)
 
@@ -103,7 +128,7 @@ def register_longform(server, aliases=False):
         try:
             from writing_context import recover
             payload = novel_mcp.get_context(project)
-            recovery = recover(Workbench(), project, prompt_id, max_chars, source_ids, document_ranges,
+            recovery = recover(Workbench(project_id=project), project, prompt_id, max_chars, source_ids, document_ranges,
                                include_source_map, source_facts)
             if source_ids is not None:
                 payload['context'] = {'omitted_by_request': True}
@@ -135,7 +160,7 @@ def register_longform(server, aliases=False):
     def writing_resume(project: str, session_id: str = '') -> str:
         """按最高direction_revision或指定session_id恢复同源任务/阶段/下一步；须显式project。不恢复宿主完整聊天。"""
         try:
-            return _dump({'ok': True, **novel_mcp.start_session(project), **Workbench().resume(project, session_id)})
+            return _dump({'ok': True, **novel_mcp.start_session(project), **Workbench(project_id=project).resume(project, session_id)})
         except Exception as exc:
             return _fail(exc)
 
@@ -157,7 +182,7 @@ def register_longform(server, aliases=False):
     @target.tool()
     def draft_list(project: str) -> str:
         """仅列本接口管理的版本化草稿；空列表不代表Markdown正文不存在。须显式project。"""
-        return _wb(lambda w: w.store.list_drafts(w.project_id(project)))
+        return _wb(lambda w: w.store.list_drafts(w.project_id(project)), project)
 
     @target.tool(annotations=read)
     def draft_get(project: str, draft_id: str, revision: int = 0,
@@ -169,37 +194,37 @@ def register_longform(server, aliases=False):
                 raise ValueError('核对审稿引用须指定固定revision>=1')
             return check(w.store.draft(w.project_id(project), draft_id, revision or None),
                          expected_fingerprint, review_items)
-        return _wb(read_draft)
+        return _wb(read_draft, project)
 
     @target.tool()
     def draft_propose(project: str, draft_id: str, title: str, body: str, baseline: int = 0) -> str:
         """保存候选修改并返回Diff；不修改草稿当前版本，不写Canonical文件。"""
-        return _wb(lambda w: w.propose(project, draft_id, title, body, baseline))
+        return _wb(lambda w: w.propose(project, draft_id, title, body, baseline), project)
 
     @target.tool()
     def draft_propose_edit(project: str, draft_id: str, selected_text: str, replacement: str, baseline: int) -> str:
         """仅替换唯一选中的原文并预览；未选中正文由程序保持不变。"""
-        return _wb(lambda w: w.propose_edit(project, draft_id, selected_text, replacement, baseline))
+        return _wb(lambda w: w.propose_edit(project, draft_id, selected_text, replacement, baseline), project)
 
     @target.tool()
     def draft_preview(proposal_id: str) -> str:
         """读取候选全文、原版本和差异，供展示给作者。"""
-        return _wb(lambda w: w.store.preview(proposal_id))
+        return _proposal_wb(lambda w: w.store.preview(proposal_id), proposal_id)
 
     @target.tool()
     def draft_save(proposal_id: str, operation_key: str) -> str:
         """将候选保存为独立草稿新版本；应先展示差异。防冲突与重复，不确认Canon、不发布。"""
-        return _wb(lambda w: w.store.commit_draft(proposal_id, operation_key))
+        return _proposal_wb(lambda w: w.store.commit_draft(proposal_id, operation_key), proposal_id)
 
     @target.tool()
     def draft_reject(proposal_id: str) -> str:
         """拒绝待处理候选，不改变当前草稿。"""
-        return _wb(lambda w: w.store.reject(proposal_id))
+        return _proposal_wb(lambda w: w.store.reject(proposal_id), proposal_id)
 
     @target.tool()
     def draft_export(project: str, draft_id: str, revision: int = 0) -> str:
         """返回Markdown稿件，可保存为文件；不提交到发行平台。"""
-        return _wb(lambda w: w.export(project, draft_id, revision or None))
+        return _wb(lambda w: w.export(project, draft_id, revision or None), project)
 
     @target.tool(annotations=read)
     def library_list_books() -> str:
@@ -256,19 +281,19 @@ def register_longform(server, aliases=False):
     @server.tool(annotations=ToolAnnotations(read_only_hint=True))
     def writing_preview_snapshot(project: str, session_id: str, snapshot: dict) -> str:
         """预览长文项目会话交接，不保存。"""
-        return _wb(lambda w: w.conversations.preview(project, session_id, snapshot))
+        return _wb(lambda w: w.conversations.preview(project, session_id, snapshot), project)
 
     @server.tool(annotations=ToolAnnotations(read_only_hint=False, destructive_hint=False, idempotent_hint=True))
     def writing_save_snapshot(project: str, session_id: str, snapshot: dict, baseline: int, preview_fingerprint: str, operation_key: str) -> str:
         """保存已预览并获用户授权的会话交接版本。"""
-        return _wb(lambda w: w.conversations.save(project, session_id, snapshot, baseline, preview_fingerprint, operation_key))
+        return _wb(lambda w: w.conversations.save(project, session_id, snapshot, baseline, preview_fingerprint, operation_key), project)
 
     @server.tool(annotations=ToolAnnotations(read_only_hint=True))
     def writing_list_snapshots(project: str, session_id: str = '', offset: int = 0, limit: int = 20) -> str:
         """列出项目会话备份。"""
-        return _wb(lambda w: w.conversations.list(project, session_id, offset, limit))
+        return _wb(lambda w: w.conversations.list(project, session_id, offset, limit), project)
 
     @server.tool(annotations=ToolAnnotations(read_only_hint=True))
     def writing_read_snapshot(project: str, session_id: str, revision: int, expected_fingerprint: str, char_offset: int = 0, max_chars: int = 3000) -> str:
         """读取固定版本交接JSON。"""
-        return _wb(lambda w: w.conversations.read(project, session_id, revision, expected_fingerprint, char_offset, max_chars))
+        return _wb(lambda w: w.conversations.read(project, session_id, revision, expected_fingerprint, char_offset, max_chars), project)

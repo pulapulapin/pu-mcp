@@ -9,7 +9,7 @@ def register_knowledge(server,call,*,include_prompts=True):
   args.pop('run',None)
   for key,value in list(args.items()):
    if hasattr(value,'model_dump'):args[key]=value.model_dump(mode='json',by_alias=True,exclude_unset=isinstance(value,PromptCustomization))
-  return call(lambda w:execute(w,name,args))
+  return call(lambda w:execute(w,name,args), project=args.get('project',''))
  read=ToolAnnotations(read_only_hint=True)
  write=ToolAnnotations(read_only_hint=False,destructive_hint=False,idempotent_hint=True)
  if include_prompts:

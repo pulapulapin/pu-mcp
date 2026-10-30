@@ -2,10 +2,10 @@
 from knowledge_data import Knowledge
 from research_workspace import ResearchWorkspace
 
-def workspace():
+def workspace(project=''):
  # Knowledge may explicitly address registered story projects, without invoking
  # the novel resume algorithm or changing public research-session defaults.
- w=ResearchWorkspace(profile='workspace')
+ w=ResearchWorkspace(profile='workspace',store_project=project)
  from novel_config import project_dirs
  w.allowed.update({key:{'path':value,'label':key,'domain':'story'} for key,value in project_dirs(w.settings).items()})
  return w

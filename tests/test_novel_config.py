@@ -63,4 +63,21 @@ class PortableConfigTests(unittest.TestCase):
         (self.root/'projects/escape').symlink_to(self.root/'external',target_is_directory=True)
         with self.assertRaises(ValueError):novel_mcp.resolve_project('escape')
 
+    def test_project_store_must_be_explicit_project_local_directory(self):
+        storylab = self.root / 'story' / '_storylab'; storylab.mkdir(parents=True)
+        self.write({'projects': {'story': str(storylab)},
+                    'project_stores': {'story': {
+                        'path': str(self.root / 'story' / '.puknowledge'), 'mode': 'shadow'}}})
+        settings = load_settings()
+        self.assertEqual(settings['project_stores']['story']['path'],
+                         self.root / 'story' / '.puknowledge')
+        self.assertEqual(settings['project_stores']['story']['mode'], 'shadow')
+        for entry in (
+                {'path': str(self.root / 'elsewhere'), 'mode': 'shadow'},
+                {'path': str(self.root / 'story' / '.puknowledge'), 'mode': 'unknown'}):
+            self.write({'projects': {'story': str(storylab)},
+                        'project_stores': {'story': entry}})
+            with self.assertRaises(ValueError):
+                load_settings()
+
 if __name__=='__main__':unittest.main()

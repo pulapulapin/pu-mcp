@@ -8,7 +8,7 @@ from story_planning import StoryPlanning, ChangeSet
 def register_story_planning(server):
     def call(method, **args):
         try:
-            result = getattr(StoryPlanning(workspace()), method)(**args)
+            result = getattr(StoryPlanning(workspace(args.get('project',''))), method)(**args)
             return json.dumps({'ok': True, 'result': result}, ensure_ascii=False)
         except (ValueError, TypeError, KeyError) as exc:
             return json.dumps({'ok': False, 'error': str(exc)}, ensure_ascii=False)

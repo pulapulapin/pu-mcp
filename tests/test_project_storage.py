@@ -20,9 +20,7 @@ class ProjectStorageTests(unittest.TestCase):
         self.config = self.root / 'config.json'
         self.config.write_text(json.dumps({
             'data_dir': str(self.root / 'shared'),
-            'workspaces': {'sample-story': {'path': str(self.storylab),
-                                             'label': 'Synthetic story',
-                                             'domain': 'writing'}},
+            'projects': {'sample-story': str(self.storylab)},
             'research_roots': [str(self.root)],
         }))
         env = patch.dict(os.environ, {
@@ -49,6 +47,9 @@ class ProjectStorageTests(unittest.TestCase):
         self.save('record', 'entry', {'record_type': 'note', 'schema_revision': 1,
                                       'values': {'text': 'candidate'},
                                       'status': 'candidate', 'evidence': []})
+        self.save('dataset', 'global-reference', {
+            'title': 'Synthetic global reference', 'scope': 'global', 'purpose': 'reference'},
+                  dataset='global-reference')
         proposal = self.w.store.propose('sample-story', 'draft-one', 'Draft', 'Body', 0)
         self.w.store.commit_draft(proposal['id'], 'save-draft')
         with self.w.store.connection(write=True) as db:
@@ -70,6 +71,8 @@ class ProjectStorageTests(unittest.TestCase):
         self.assertEqual(preview['state'], 'PREVIEW_READY')
         self.assertEqual(preview['project_dataset_ids'], ['project-model'])
         self.assertEqual(preview['project_knowledge_versions'], 3)
+        self.assertEqual(preview['global_dependency_dataset_ids'], ['global-reference'])
+        self.assertEqual(preview['global_dependency_knowledge_versions'], 1)
         self.assertEqual(preview['project_table_counts']['drafts'], 1)
         self.assertEqual(preview['project_table_counts']['draft_versions'], 1)
         self.assertEqual(preview['dependency_research_source_ids'], ['shared-reference'])
@@ -89,6 +92,9 @@ class ProjectStorageTests(unittest.TestCase):
             'title': 'Synthetic private model', 'scope': 'project', 'purpose': 'model'})
         self.save('schema', 'note', {'fields': {'text': {'type': 'string'}},
                                      'allowed_relations': []})
+        self.save('dataset', 'global-reference', {
+            'title': 'Synthetic global reference', 'scope': 'global', 'purpose': 'reference'},
+                  dataset='global-reference')
         proposal = self.w.store.propose('sample-story', 'draft-one', 'Draft', 'Body', 0)
         self.w.store.commit_draft(proposal['id'], 'save-draft')
         with self.w.store.connection(write=True) as db:
@@ -115,6 +121,15 @@ class ProjectStorageTests(unittest.TestCase):
         verified = planner.verify('sample-story')
         self.assertTrue(verified['matches_source'])
         self.assertEqual(verified['foreign_key_issues'], [])
+        self.save('schema', 'global-note', {'fields': {'text': {'type': 'string'}},
+                                            'allowed_relations': []},
+                  dataset='global-reference')
+        sync_preview = planner.sync_preview('sample-story')
+        self.assertFalse(sync_preview['currently_matches_source'])
+        synced = planner.sync('sample-story', sync_preview['preview_fingerprint'])
+        self.assertTrue(synced['matches_source'])
+        self.assertTrue(Path(synced['rollback_store']).is_file())
+        self.assertTrue(planner.verify('sample-story')['matches_source'])
 
 
 if __name__ == '__main__':

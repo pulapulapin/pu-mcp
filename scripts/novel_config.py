@@ -28,9 +28,9 @@ def load_settings(neutral=False):
     raw = {}
     if explicit or (SOURCE_CHECKOUT and file.is_file()):
         raw = json.loads(file.read_text(encoding='utf-8'))
-        allowed = {'data_dir', 'projects_dir', 'projects', 'books_root', 'collections', 'pucatch', 'capture', 'research_roots', 'project_states', 'research_projects', 'workspaces', 'fs_workspaces', 'modules', 'writing_contexts'}
+        allowed = {'data_dir', 'projects_dir', 'projects', 'project_stores', 'books_root', 'collections', 'pucatch', 'capture', 'research_roots', 'game_repositories', 'project_states', 'research_projects', 'workspaces', 'fs_workspaces', 'modules', 'writing_contexts'}
         if not isinstance(raw, dict) or set(raw) - allowed:
-            raise ValueError('配置必须是JSON对象，仅允许data_dir/projects_dir/projects/books_root/collections/pucatch/capture/research_roots/project_states/research_projects/workspaces/fs_workspaces/modules/writing_contexts')
+            raise ValueError('配置必须是JSON对象，仅允许data_dir/projects_dir/projects/project_stores/books_root/collections/pucatch/capture/research_roots/game_repositories/project_states/research_projects/workspaces/fs_workspaces/modules')
     if 'workspaces' in raw:
         if 'research_projects' in raw and raw['workspaces']!=raw['research_projects']:raise ValueError('workspaces与research_projects配置冲突')
         raw['research_projects']=raw['workspaces']
@@ -55,7 +55,30 @@ def load_settings(neutral=False):
         if not isinstance(key, str) or not key or any(c not in 'abcdefghijklmnopqrstuvwxyz0123456789-_' for c in key):
             raise ValueError('项目ID只能使用小写字母、数字、短横线和下划线')
     registered = {key: path(value) for key, value in registered.items()}
+    stores_raw = raw.get('project_stores', {})
+    if not isinstance(stores_raw, dict):
+        raise ValueError('project_stores必须是项目ID到存储配置的JSON对象')
+    project_stores = {}
+    for key, value in stores_raw.items():
+        if key not in registered:
+            raise ValueError('project_stores只能绑定显式projects项目: ' + str(key))
+        if not isinstance(value, dict) or set(value) != {'path', 'mode'}:
+            raise ValueError('project_stores条目必须且只能包含path/mode')
+        if value['mode'] not in ('shadow', 'active'):
+            raise ValueError('project_stores.mode必须是shadow或active')
+        store_path = path(value['path'])
+        configured = registered[key]
+        project_root = configured.parent if configured.name == '_storylab' else configured
+        expected = (project_root / '.puknowledge').resolve()
+        if store_path != expected:
+            raise ValueError('项目数据库必须位于项目根目录.puknowledge: ' + key)
+        project_stores[key] = {'path': store_path, 'mode': value['mode']}
+    # Non-neutral legacy installs may still ship dnd collections; neutral/public configs do not infer them.
     supplied = raw.get('collections', {})
+    if not supplied and not neutral and 'workspaces' not in raw and 'research_projects' not in raw:
+        dnd_root = registered.get('dnd', projects / 'dnd')
+        if (dnd_root / 'source').is_dir():
+            supplied = {'dnd-handoff': str(dnd_root / 'source')}
     if not isinstance(supplied, dict):
         raise ValueError('collections必须是集合ID到目录的JSON对象')
     for key in supplied:
@@ -98,14 +121,16 @@ def load_settings(neutral=False):
         raise ValueError('research_roots必须是许可目录列表')
     evidence_roots = [path(value) for value in roots]
     evidence_roots += [books] + [path(value) for value in supplied.values()]
+    from novel_game import validate_repositories
     from workspace_fs import collect_fs_workspaces
+    games = validate_repositories(raw.get('game_repositories', {}), path)
     states = raw.get('project_states', {})
     if not isinstance(states, dict) or any(not isinstance(k,str) or not re.fullmatch(r'[a-z0-9_-]{1,80}',k) or v not in ('active','paused') for k,v in states.items()):
         raise ValueError('project_states必须是项目ID到active/paused的对象')
     fs_workspaces=collect_fs_workspaces(research,raw.get('fs_workspaces'),path)
     from writing_context import validate_bindings
     writing_contexts=validate_bindings(raw.get('writing_contexts', {}), fiction_ids)
-    return {'writing_contexts':writing_contexts, 'research_projects':research, 'game_repositories':{}, 'project_states':states, 'research_roots': evidence_roots, 'pucatch':configured, 'capture':configured, 'modules':list(modules_raw), 'data_dir': data, 'projects_dir': projects, 'projects': registered, 'books_root': books,
+    return {'writing_contexts':writing_contexts, 'research_projects':research, 'game_repositories':games, 'project_states':states, 'research_roots': evidence_roots, 'pucatch':configured, 'capture':configured, 'modules':list(modules_raw), 'data_dir': data, 'projects_dir': projects, 'projects': registered, 'project_stores': project_stores, 'books_root': books,
             'collections': {key: path(value) for key, value in supplied.items()},'fs_workspaces':fs_workspaces}
 
 

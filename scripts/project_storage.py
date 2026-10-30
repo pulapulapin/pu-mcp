@@ -23,23 +23,28 @@ class ProjectStorage:
         identifier(project)
         configured = Path(self.w.project(project)).resolve()
         root = configured.parent if configured.name == '_storylab' else configured
-        target_dir = root / '.puknowledge'
+        binding = self.w.settings.get('project_stores', {}).get(project)
+        target_dir = Path(binding['path']).resolve() if binding else root / '.puknowledge'
         return configured, root, target_dir, target_dir / 'workspace.sqlite3'
 
     def get(self, project):
         configured, root, target_dir, target = self.placement(project)
+        binding = self.w.settings.get('project_stores', {}).get(project)
+        active = bool(binding and binding['mode'] == 'active')
         return {
             'project': project,
             'configured_project_path': str(configured),
             'project_root': str(root),
             'storylab_path': str(configured) if configured.name == '_storylab' else None,
-            'active_store': str(self.w.store.path),
-            'active_mode': 'shared',
+            'active_store': str(target if active else self.w.store.path),
+            'active_mode': 'project' if active else 'shared',
+            'configured_project_store_mode': binding['mode'] if binding else 'unbound',
             'proposed_store_directory': str(target_dir),
             'proposed_store': str(target),
             'proposed_store_exists': target.exists(),
-            'routing_changed': False,
-            'notice': 'Read-only status. Project routing still uses the shared store.',
+            'routing_changed': active,
+            'notice': ('Read-only status. Project-private operations use the project store.' if active else
+                       'Read-only status. Project routing still uses the shared store.'),
         }
 
     @staticmethod
@@ -69,7 +74,7 @@ class ProjectStorage:
             table: self._rows(db, table, 'project=?', (project,))
             for table in PROJECT_TABLES if table in tables
         }
-        dataset_ids = []
+        dataset_ids, global_dataset_ids = [], []
         rows = db.execute("SELECT object_id,body FROM knowledge_versions WHERE kind='dataset' "
                           "ORDER BY object_id,revision DESC").fetchall()
         seen = set()
@@ -80,12 +85,20 @@ class ProjectStorage:
             body = json.loads(row['body'])
             if body.get('scope') == 'project' and body.get('owner_project') == project:
                 dataset_ids.append(row['object_id'])
+            elif body.get('scope') == 'global':
+                global_dataset_ids.append(row['object_id'])
         dataset_ids.sort()
-        knowledge_rows = []
+        global_dataset_ids.sort()
+        project_knowledge_rows = []
         if dataset_ids:
             marks = ','.join('?' for _ in dataset_ids)
-            knowledge_rows = self._rows(db, 'knowledge_versions',
-                                        f'dataset_id IN ({marks})', dataset_ids)
+            project_knowledge_rows = self._rows(db, 'knowledge_versions',
+                                                f'dataset_id IN ({marks})', dataset_ids)
+        global_knowledge_rows = []
+        if global_dataset_ids:
+            marks = ','.join('?' for _ in global_dataset_ids)
+            global_knowledge_rows = self._rows(db, 'knowledge_versions',
+                                               f'dataset_id IN ({marks})', global_dataset_ids)
 
         private_source_ids = []
         if 'research_sources' in tables:
@@ -108,7 +121,9 @@ class ProjectStorage:
         return {
             'project_rows': project_rows,
             'dataset_ids': dataset_ids,
-            'knowledge_rows': knowledge_rows,
+            'global_dataset_ids': global_dataset_ids,
+            'project_knowledge_rows': project_knowledge_rows,
+            'global_knowledge_rows': global_knowledge_rows,
             'private_source_ids': private_source_ids,
             'dependency_source_ids': dependency_source_ids,
             'research_sources': research_sources,
@@ -118,12 +133,14 @@ class ProjectStorage:
     def _closure_manifest(self, closure):
         tables = {name: self._manifest(rows)
                   for name, rows in closure['project_rows'].items()}
-        tables['knowledge_versions'] = self._manifest(closure['knowledge_rows'])
+        tables['knowledge_versions'] = self._manifest(
+            closure['project_knowledge_rows'] + closure['global_knowledge_rows'])
         tables['research_sources'] = self._manifest(closure['research_sources'])
         tables['research_source_versions'] = self._manifest(closure['research_versions'])
         return {
             'tables': tables,
             'dataset_ids': closure['dataset_ids'],
+            'global_dataset_ids': closure['global_dataset_ids'],
             'private_source_ids': closure['private_source_ids'],
             'dependency_source_ids': closure['dependency_source_ids'],
             'fingerprint': digest(encode(tables)),
@@ -150,7 +167,9 @@ class ProjectStorage:
             'source_schema_version': schema,
             'project_table_counts': counts,
             'project_dataset_ids': manifest['dataset_ids'],
-            'project_knowledge_versions': manifest['tables']['knowledge_versions']['count'],
+            'project_knowledge_versions': len(closure['project_knowledge_rows']),
+            'global_dependency_dataset_ids': manifest['global_dataset_ids'],
+            'global_dependency_knowledge_versions': len(closure['global_knowledge_rows']),
             'private_research_source_ids': manifest['private_source_ids'],
             'private_research_source_versions': sum(
                 1 for row in closure['research_versions']
@@ -162,7 +181,7 @@ class ProjectStorage:
             'target_relative_path': '.puknowledge/workspace.sqlite3',
             'migration_mode': 'shadow_copy_then_read_only_cutover',
             'writes_performed': False,
-            'routing_changed': False,
+            'routing_changed': status['routing_changed'],
         }
         issues = []
         if integrity != 'ok':
@@ -212,7 +231,8 @@ class ProjectStorage:
                 self._insert_rows(db, 'research_source_versions', closure['research_versions'])
                 for table, rows in closure['project_rows'].items():
                     self._insert_rows(db, table, rows)
-                self._insert_rows(db, 'knowledge_versions', closure['knowledge_rows'])
+                self._insert_rows(db, 'knowledge_versions', closure['project_knowledge_rows'])
+                self._insert_rows(db, 'knowledge_versions', closure['global_knowledge_rows'])
                 integrity = db.execute('PRAGMA integrity_check').fetchone()[0]
                 foreign_keys = [dict(row) for row in db.execute('PRAGMA foreign_key_check')]
                 if integrity != 'ok' or foreign_keys:
@@ -236,9 +256,9 @@ class ProjectStorage:
         return {
             **result,
             'copied': True,
-            'routing_changed': False,
-            'active_store': str(self.w.store.path),
-            'notice': 'Shadow copy created and verified. Runtime still reads the shared store.',
+            'routing_changed': self.get(project)['routing_changed'],
+            'active_store': self.get(project)['active_store'],
+            'notice': 'Project copy created and verified; routing follows explicit project_stores mode.',
             'source_manifest_fingerprint': source_manifest['fingerprint'],
         }
 
@@ -264,5 +284,57 @@ class ProjectStorage:
             'target_manifest': target_manifest,
             'matches_source': (integrity == 'ok' and not foreign_keys and
                                source_manifest == target_manifest),
-            'routing_changed': False,
+            'routing_changed': self.get(project)['routing_changed'],
+        }
+
+    def sync_preview(self, project):
+        status = self.get(project)
+        if not status['proposed_store_exists']:
+            raise ValueError('project shadow database does not exist; use shadow copy first')
+        verification = self.verify(project)
+        payload = {
+            'project': project,
+            'target_store': verification['target_store'],
+            'target_integrity': verification['target_integrity'],
+            'foreign_key_issues': verification['foreign_key_issues'],
+            'source_manifest': verification['source_manifest'],
+            'current_target_manifest': verification['target_manifest'],
+            'currently_matches_source': verification['matches_source'],
+            'routing_changed': status['routing_changed'],
+            'writes_performed': False,
+        }
+        issues = []
+        if verification['target_integrity'] != 'ok':
+            issues.append({'code': 'target_integrity_failed'})
+        if verification['foreign_key_issues']:
+            issues.append({'code': 'target_foreign_key_failed'})
+        payload['state'] = 'BLOCKED' if issues else 'SYNC_READY'
+        payload['issues'] = issues
+        payload['preview_fingerprint'] = digest(encode(payload))
+        return payload
+
+    def sync(self, project, preview_fingerprint):
+        if not isinstance(preview_fingerprint, str) or len(preview_fingerprint) != 64:
+            raise ValueError('preview_fingerprint must be the exact 64-character sync preview fingerprint')
+        preview = self.sync_preview(project)
+        if preview['state'] != 'SYNC_READY':
+            raise ValueError('project storage sync preview is blocked')
+        if preview['preview_fingerprint'] != preview_fingerprint:
+            raise ValueError('project storage sync preview changed; preview again')
+        _, _, target_dir, target = self.placement(project)
+        backup = target_dir / ('rollback-' + uuid.uuid4().hex + '.sqlite3')
+        os.replace(target, backup)
+        try:
+            fresh = self.preview(project)
+            result = self.shadow_copy(project, fresh['preview_fingerprint'])
+        except BaseException:
+            if target.exists():
+                target.unlink()
+            os.replace(backup, target)
+            raise
+        return {
+            **result,
+            'synced': True,
+            'rollback_store': str(backup),
+            'previous_target_preserved': True,
         }
