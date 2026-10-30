@@ -1,5 +1,6 @@
 """Synthetic story graph; no project manuscripts or runtime configuration."""
 import json
+import tomllib
 import unittest
 from pathlib import Path
 from tests import test_knowledge_data as fixtures
@@ -19,6 +20,11 @@ class StoryPlanningTests(unittest.TestCase):
         pack = json.loads((Path(__file__).resolve().parents[1] /
                            'config/schemas/story-planning.json').read_text())
         self.assertEqual(pack['schema'], SCHEMA)
+
+    def test_packaging_includes_story_modules(self):
+        project = tomllib.loads((Path(__file__).resolve().parents[1] / 'pyproject.toml').read_text())
+        modules = set(project['tool']['setuptools']['py-modules'])
+        self.assertTrue({'story_planning', 'story_planning_tools'} <= modules)
 
     def commit(self, changes, key='graph'):
         baseline = self.k.revision('plan')

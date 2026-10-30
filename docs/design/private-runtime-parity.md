@@ -1,6 +1,6 @@
 # Private runtime parity and publication boundary
 
-Date: 2026-10-30. Reference runtime: local private 0.4.10 checkout. Public base:
+Date: 2026-10-30. Reference runtime: local private 0.4.11 checkout. Public base:
 0.3.3 plus `feat/story-planning`. This is a behavioral comparison, not permission
 to copy private Git history or project data.
 
@@ -25,7 +25,7 @@ must never contain a default private project.
 
 ## Capability comparison
 
-| Capability | Private runtime 0.4.10 | Public feature branch | Decision |
+| Capability | Private runtime 0.4.11 | Public feature branch | Decision |
 | --- | --- | --- | --- |
 | Core datasets, records, relations, preview/save | Available | Available | Shared base |
 | Prompt fixed-version resolution and project differences | Available | Ported in this batch | Public generic core |
@@ -33,9 +33,9 @@ must never contain a default private project.
 | Source selection, manuscript ranges and Markdown outline/fact anchors | Available | Ported in this batch | Public longform |
 | Draft/Markdown quote verification | Available | Ported in this batch | Public longform/fs |
 | Neutral corpus indexing and exact reads | Available | Ported in this batch | Public optional corpus extension |
-| Candidate story graph and dependency impact paths | Not loaded in current Chat | Implemented on public feature branch | Back-port only after public review; no production activation yet |
-| Chapter-specific story graph context | Not loaded in current Chat | Implemented on public feature branch | Bounded candidate-graph context; external sources remain separate |
-| Rule-based time/location/knowledge continuity | Not loaded in current Chat | Implemented on public feature branch | Conservative explicit-fact checks; unknowns stay insufficient evidence |
+| Candidate story graph and dependency impact paths | Implemented and host-discovered | Implemented on public feature branch | Same generic protocol; real project data remains private |
+| Chapter-specific story graph context | Implemented and host-discovered | Implemented on public feature branch | Bounded candidate-graph context; external sources remain separate |
+| Rule-based time/location/knowledge continuity | Implemented and host-discovered | Implemented on public feature branch | Conservative explicit-fact checks; unknowns stay insufficient evidence |
 | Game repository/handoff tools | Private domain extension | Excluded | Keep private unless separately generalized |
 | Voice experiments | Private domain extension | Excluded | Keep private |
 | D&D classification/research-card compatibility | Private/legacy domain behavior | Excluded from new generic migration | Use external domain pack if ever published |
@@ -43,12 +43,12 @@ must never contain a default private project.
 | Embedded reader probe and host screenshots | Experimental/private acceptance | Excluded | Reassess as a separate UI feature |
 
 The public package version remains 0.3.3 during feature development. Private
-runtime version 0.4.10 must not be copied as a release number. Versioning is set
+runtime version 0.4.11 must not be copied as a release number. Versioning is set
 only when public scope, migration notes, packaging and host acceptance are ready.
 
 ## Verification for this synchronization batch
 
-The public repository passes 263 tests. The verified scope includes prompt,
+The public repository passes 264 tests. The verified scope includes prompt,
 writing context, quote anchoring, source mapping, corpus, story planning,
 chapter-specific graph context and conservative continuity review, plus real
 stdio protocol tests using temporary projects. Tests do not read any private
@@ -56,10 +56,10 @@ project. Staged-content checks must reject real project names, user absolute
 paths, private remote references, credentials, databases and acceptance
 screenshots.
 
-Passing tests prove bounded protocol behavior. They do not prove current Chat has
-refreshed tools, private project context is complete, a candidate is Canon, or the
-resulting fiction is good. Current Chat remains on the private runtime until an
-explicit migration and host acceptance task.
+Passing tests prove bounded protocol behavior. Private host discovery separately
+confirmed the five interfaces, but does not prove private project context is
+complete, a candidate is Canon, or the resulting fiction is good. The public
+branch was not installed into the private host.
 
 ## Next synchronization batch
 

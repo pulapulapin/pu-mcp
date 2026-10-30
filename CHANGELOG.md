@@ -6,7 +6,8 @@
 - Report explicit dependency impact paths and stale endpoints without promoting candidates to Canon.
 - Add version-pinned chapter graph context and conservative time/location/state
   consistency findings with explicit insufficient-evidence results.
-- Add synthetic 48-chapter and real stdio tests; chapter context and semantic continuity checks remain pending.
+- Add synthetic 48-chapter, package-manifest and real stdio tests; external-source
+  aggregation and literary review remain separate future work.
 - Port generic fixed-version Prompt resolution, explicit writing-context recovery,
   manuscript/source anchors and neutral corpus indexing from the local behavioral
   reference, with synthetic tests only.
