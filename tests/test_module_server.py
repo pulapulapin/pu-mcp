@@ -15,6 +15,7 @@ CORE = {
     'dataset_get', 'schema_preview', 'schema_save', 'schema_get', 'record_preview', 'record_save',
     'record_get', 'record_query', 'relation_preview', 'relation_save', 'relation_query',
     'dataset_validate', 'import_preview', 'import_commit',
+    'prompt_resolve',
 }
 FS = {'fs_workspace_status', 'fs_list_files', 'fs_read_file', 'fs_search'}
 LONGFORM_PUBLIC = {
@@ -56,7 +57,7 @@ class ModuleServerTests(unittest.TestCase):
             cfg = _config(root)
             names = await _tools(['-B', str(ROOT / 'scripts/knowledge_entry.py'), '--config', str(cfg)], cfg, root)
             self.assertEqual(names, CORE)
-            self.assertEqual(len(names), 38)
+            self.assertEqual(len(names), 39)
 
     def test_modules_core_fs_adds_four_fs_tools(self):
         asyncio.run(self._core_fs())
@@ -69,7 +70,7 @@ class ModuleServerTests(unittest.TestCase):
                 ['-B', str(ROOT / 'scripts/knowledge_entry.py'), '--config', str(cfg), '--modules', 'core,fs'],
                 cfg, root)
             self.assertEqual(names, CORE | FS)
-            self.assertEqual(len(names), 42)
+            self.assertEqual(len(names), 43)
             env = {**os.environ, 'PUKNOWLEDGE_CONFIG': str(cfg), 'NOVEL_WORKBENCH_CONFIG': str(cfg)}
             params = StdioServerParameters(
                 command=PYTHON,

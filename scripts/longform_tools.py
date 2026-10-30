@@ -93,11 +93,41 @@ def register_longform(server, aliases=False):
         except Exception as exc:
             return _fail(exc)
 
-    @target.tool()
-    def writing_get_context(project: str) -> str:
-        """读取确认上下文与当前方向任务；须显式project。只读。"""
+    @target.tool(annotations=read)
+    def writing_get_context(project: str, prompt_id: str = '', max_chars: int = 140000,
+                            source_ids: list[str] | None = None,
+                            document_ranges: list[dict] | None = None,
+                            include_source_map: bool = False,
+                            source_facts: list[dict] | None = None) -> str:
+        """只读恢复。source_ids选材料，document_ranges选正文范围。include_source_map返回标题来源索引。source_facts候选项含id/source_id/expected_fingerprint/kind(story_contract|character|timeline)/entity_id/field/value/quote，可选start_char/status_quote；仅核对引文，不认证含义或批准、不写入。"""
         try:
-            return _dump({'ok': True, **_task_context(novel_mcp.get_context(project), project)})
+            from writing_context import recover
+            payload = novel_mcp.get_context(project)
+            recovery = recover(Workbench(), project, prompt_id, max_chars, source_ids, document_ranges,
+                               include_source_map, source_facts)
+            if source_ids is not None:
+                payload['context'] = {'omitted_by_request': True}
+            task = recovery['task']
+            if prompt_id == 'reader-reviewer':
+                payload['context'] = {}
+                payload['next_task'] = None
+            result = {'ok': True, **payload, 'recovery': recovery,
+                          'project_next_task': payload['next_task'],
+                          'next_task': {'label': task['stage'], 'instruction': task['task'],
+                                        'next_step': task['next_step'], 'task_id': task['task_id'],
+                                        'state': task['task_state'], 'direction_revision': task['direction_revision'],
+                                        'automatic_development_allowed': task['automatic_development_allowed']},
+                          'next_task_source': task['resume_mode'],
+                          'context_scope': 'context为旧JSON视图，recovery为显式来源恢复；二者不互相替代。'}
+            if len(_dump(result)) > max_chars:
+                if recovery['state'] == 'READY':
+                    recovery['state'] = 'PARTIAL'
+                recovery['delivery_complete'] = False
+                recovery['issues'].append({'source': 'delivery', 'required': False,
+                                           'reason': '完整响应超过预算；兼容JSON视图省略，须补读后才可声明完整恢复。'})
+                result['context'] = {'content_omitted': True}
+                recovery['allowed_scope'] = '仅讨论不依赖未交付材料的候选；不得声称完整恢复。'
+            return _dump(result)
         except Exception as exc:
             return _fail(exc)
 
@@ -109,11 +139,13 @@ def register_longform(server, aliases=False):
         except Exception as exc:
             return _fail(exc)
 
-    @target.tool()
+    @target.tool(annotations=read)
     def writing_validate(project: str) -> str:
-        """运行长文项目结构与设定检查；须显式project。只读。"""
+        """仅检查_storylab JSON结构；失败不代表外部Markdown/Canon缺失。不补写字段。只读。"""
         try:
-            return _dump({'ok': True, **novel_mcp.validate(project)})
+            return _dump({'ok': True, **novel_mcp.validate(project),
+                          'validation_scope': 'storylab_json_structure', 'external_documents_validated': False,
+                          'next_task_scope': 'JSON结构补全建议，不替代当前会话方向；不授权编造或写入设定。'})
         except Exception as exc:
             return _fail(exc)
 
@@ -124,13 +156,20 @@ def register_longform(server, aliases=False):
 
     @target.tool()
     def draft_list(project: str) -> str:
-        """列出独立章节草稿及版本；须显式project。不代表已定稿或发布。"""
+        """仅列本接口管理的版本化草稿；空列表不代表Markdown正文不存在。须显式project。"""
         return _wb(lambda w: w.store.list_drafts(w.project_id(project)))
 
-    @target.tool()
-    def draft_get(project: str, draft_id: str, revision: int = 0) -> str:
-        """读取当前或历史草稿；revision=0读取当前版本。"""
-        return _wb(lambda w: w.store.draft(w.project_id(project), draft_id, revision or None))
+    @target.tool(annotations=read)
+    def draft_get(project: str, draft_id: str, revision: int = 0,
+                  expected_fingerprint: str = '', review_items: list[dict] | None = None) -> str:
+        """只读当前/历史草稿并返回正文SHA。审稿引用核对须revision>=1和expected_fingerprint，review_items每项id/quote及可选start_char(Unicode从0计)。不验证文学判断、不保存意见。"""
+        def read_draft(w):
+            from manuscript_review import check
+            if review_items is not None and revision < 1:
+                raise ValueError('核对审稿引用须指定固定revision>=1')
+            return check(w.store.draft(w.project_id(project), draft_id, revision or None),
+                         expected_fingerprint, review_items)
+        return _wb(read_draft)
 
     @target.tool()
     def draft_propose(project: str, draft_id: str, title: str, body: str, baseline: int = 0) -> str:

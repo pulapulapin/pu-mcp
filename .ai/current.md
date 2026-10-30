@@ -16,3 +16,11 @@ Verification: 196 public-repository tests passed, including nine new graph tests
 and a real stdio preview/save/read. Existing subprocess tests now use the active
 Python interpreter rather than assuming a checkout-local virtualenv. No package
 release, real Chat host test or production project import was performed.
+
+2026-10-30 parity batch: generic Prompt resolution, writing-context recovery,
+source selection/ranges/maps/fact anchors, quote verification and neutral corpus
+indexing were ported from the private 0.4.10 behavioral reference. Public full
+suite now passes 258 tests. Private game/voice/D&D compatibility, deployment
+tunnel, private examples and screenshots remain excluded. Current Chat binding
+continues using the private runtime; no runtime switch or project write occurred.
+See docs/design/private-runtime-parity.md.

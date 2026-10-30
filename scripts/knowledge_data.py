@@ -45,6 +45,8 @@ class Knowledge:
   meta=self._access(db,project,dataset,True)['body']
   if kind=='record':
    schema=self._row(db,'schema',dataset,normalized['record_type'],normalized['schema_revision']);validate_values(schema['body'],normalized['values']);self._evidence(db,project,meta,normalized)
+   from prompt_library import validate_prompt_record
+   validate_prompt_record(self,db,project,meta,oid,normalized)
   if kind=='relation':
    endpoints=[]
    for key in ('from','to'):
@@ -148,6 +150,8 @@ class Knowledge:
      try:
       if kind=='record':
        schema=self._row(db,'schema',dataset_id,body['record_type'],body['schema_revision']);validate_values(schema['body'],body['values']);self._evidence(db,project,meta,body)
+       from prompt_library import validate_prompt_record
+       validate_prompt_record(self,db,project,meta,row['object_id'],body)
        if not body['evidence']:warnings.append({'id':row['object_id'],'code':'missing_evidence'})
        for e in body['evidence']:
         source,_,_=self.w.evidence.access(db,e['source_id'],project,e['source_revision'])

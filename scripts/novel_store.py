@@ -15,6 +15,7 @@ from novel_research import edition_references, matches_edition, validate_filters
 from novel_research_cards import CARD_COLLECTION, prepare_card, card_metadata, card_reference, card_edition_label
 
 SCHEMA = 8
+LEGACY_CARD_COLLECTION = 'research-cards'
 
 def now():
     return datetime.now(timezone.utc).isoformat(timespec='microseconds')
@@ -139,7 +140,7 @@ class Store:
         finally:
             db.close()
 
-    def index(self, collection, root):
+    def index(self, collection, root, classifier=None, expected_manifest=None):
         if collection==CARD_COLLECTION:
             raise ValueError("research-cards由研究卡接口管理，不能用目录索引覆盖")
         identifier(collection)
@@ -147,6 +148,9 @@ class Store:
         if not root.is_dir():
             raise ValueError('资料集合目录不存在')
         files = sorted(p for p in root.rglob('*') if p.is_file() and p.suffix.lower() in {'.md','.txt','.json'})
+        expected = None if expected_manifest is None else {
+            item['path']: item['fingerprint'] for item in expected_manifest
+        }
         updated, unchanged, skipped, seen = 0, 0, [], []
         with self.connection(write=True) as db:
             for path in files:
@@ -162,6 +166,8 @@ class Store:
                     skipped.append({'path':str(path), 'reason':type(exc).__name__})
                     continue
                 rel, fp = path.relative_to(root).as_posix(), digest(body)
+                if expected is not None and expected.get(rel) != fp:
+                    raise ValueError('集合文件已在预览后变化；请重新预览')
                 seen.append(rel)
                 old = db.execute('SELECT * FROM sources WHERE collection=? AND path=?', (collection,rel)).fetchone()
                 if old and old['fingerprint'] == fp:
@@ -171,13 +177,16 @@ class Store:
                 stamp = now()
                 db.execute('''INSERT INTO sources(collection,path,fingerprint,edition,updated) VALUES(?,?,?,?,?)
                     ON CONFLICT(collection,path) DO UPDATE SET fingerprint=excluded.fingerprint,
-                    edition=excluded.edition,updated=excluded.updated,active=1''', (collection,rel,fp,rule_label(rel,body),stamp))
+                    edition=excluded.edition,updated=excluded.updated,active=1''',
+                    (collection,rel,fp,classifier(rel,body) if classifier else rule_label(rel,body),stamp))
                 source_id = db.execute('SELECT id FROM sources WHERE collection=? AND path=?', (collection,rel)).fetchone()[0]
                 db.execute('INSERT OR IGNORE INTO source_versions VALUES(?,?,?,?)', (source_id,fp,body,stamp))
                 db.execute('DELETE FROM chunks WHERE source_id=?', (source_id,))
                 db.executemany('INSERT INTO chunks(source_id,line_start,line_end,body) VALUES(?,?,?,?)',
                     [(source_id,a,b,c) for a,b,c in chunks(body)])
                 updated += 1
+            if expected is not None and set(seen) != set(expected):
+                raise ValueError('集合文件已在预览后变化；请重新预览')
             # A missing or unreadable file must not remain silently searchable as current.
             active = db.execute('SELECT id,path FROM sources WHERE collection=?', (collection,)).fetchall()
             seen_set = set(seen)

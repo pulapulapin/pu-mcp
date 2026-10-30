@@ -11,8 +11,8 @@ def workspace():
  return w
 
 def validate_params(args):
- string_keys={'project','kind','dataset_id','object_id','record_type','record_id','expected_fingerprint','preview_fingerprint','operation_key','direction','format','content','path','expected_sha256'}
- int_keys={'revision','dataset_revision','baseline','offset','limit','schema_revision'}
+ string_keys={'project','kind','dataset_id','object_id','record_type','record_id','expected_fingerprint','preview_fingerprint','operation_key','direction','format','content','path','expected_sha256','prompt_id','customization_dataset_id','turn_instruction'}
+ int_keys={'revision','dataset_revision','baseline','offset','limit','schema_revision','customization_revision'}
  bool_keys={'owner_confirmed','include_withdrawn'}
  for key,value in args.items():
   if key in string_keys and not isinstance(value,str):raise ValueError('参数须字符串: '+key)
@@ -22,11 +22,15 @@ def validate_params(args):
   if key=='evidence' and value is not None and not isinstance(value,list):raise ValueError('evidence须数组')
   if key=='field_mapping' and value is not None and not isinstance(value,dict):raise ValueError('field_mapping须对象')
   if key=='body' and not isinstance(value,dict):raise ValueError('body须对象')
+  if key in ('base_ref','proposed_customization') and value is not None and not isinstance(value,dict):raise ValueError(key+'须对象')
 OBJECTS={'dataset','schema','record','relation'}
 DIRECT={'record_query':'query','relation_query':'relations','dataset_validate':'validate','import_preview':'import_preview','import_commit':'import_commit'}
 def execute(workspace,operation,params):
  validate_params(params)
  k=Knowledge(workspace);args=dict(params)
+ if operation=='prompt_resolve':
+  from prompt_library import resolve
+  return resolve(k,**args)
  if operation in DIRECT:return k.dispatch(DIRECT[operation],args)
  try:kind,action=operation.split('_',1)
  except ValueError:raise ValueError('未知知识API') from None

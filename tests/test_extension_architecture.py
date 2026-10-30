@@ -13,18 +13,18 @@ from module_server import resolve_modules  # noqa: E402
 
 class ExtensionArchitectureTests(unittest.TestCase):
     def test_core_is_the_only_mandatory_base(self):
-        description = describe_modules(('core', 'fs', 'longform'))
+        description = describe_modules(('core', 'corpus', 'fs', 'longform'))
         self.assertEqual(description['model'], 'base_plus_extensions')
         self.assertEqual(description['base']['module_id'], 'core')
         self.assertEqual(description['base']['layer'], 'base')
         self.assertEqual(description['base']['depends_on'], [])
         self.assertEqual(
             {item['module_id'] for item in description['extensions']},
-            {'fs', 'longform'},
+            {'corpus', 'fs', 'longform'},
         )
 
     def test_public_distribution_only_exposes_generic_extensions(self):
-        self.assertEqual(PUBLIC_MODULES, ('core', 'fs', 'longform'))
+        self.assertEqual(PUBLIC_MODULES, ('core', 'corpus', 'fs', 'longform'))
         self.assertEqual(resolve_modules(preset='owner'), PUBLIC_MODULES)
         self.assertEqual(resolve_modules(preset='full'), PUBLIC_MODULES)
         self.assertEqual(BASE.module_id, 'core')

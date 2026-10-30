@@ -92,3 +92,10 @@ through the existing preview/save tools. Nothing is initialized automatically.
 This feature does not modify manuscripts or Canon. Chapter-context aggregation,
 semantic continuity and actual Chat host acceptance are not yet delivered.
 See the [design and boundaries](docs/design/story-planning.md).
+
+### Runtime parity policy
+
+The local private runtime may be used as a behavioral reference while public
+features are developed. Reusable behavior is ported narrowly with synthetic tests;
+private history and project content are never synchronized. See the
+[capability matrix and publication boundary](docs/design/private-runtime-parity.md).

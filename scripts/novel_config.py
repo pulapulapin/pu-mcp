@@ -28,9 +28,9 @@ def load_settings(neutral=False):
     raw = {}
     if explicit or (SOURCE_CHECKOUT and file.is_file()):
         raw = json.loads(file.read_text(encoding='utf-8'))
-        allowed = {'data_dir', 'projects_dir', 'projects', 'books_root', 'collections', 'pucatch', 'capture', 'research_roots', 'project_states', 'research_projects', 'workspaces', 'fs_workspaces', 'modules'}
+        allowed = {'data_dir', 'projects_dir', 'projects', 'books_root', 'collections', 'pucatch', 'capture', 'research_roots', 'project_states', 'research_projects', 'workspaces', 'fs_workspaces', 'modules', 'writing_contexts'}
         if not isinstance(raw, dict) or set(raw) - allowed:
-            raise ValueError('配置必须是JSON对象，仅允许data_dir/projects_dir/projects/books_root/collections/pucatch/capture/research_roots/project_states/research_projects/workspaces/fs_workspaces/modules')
+            raise ValueError('配置必须是JSON对象，仅允许data_dir/projects_dir/projects/books_root/collections/pucatch/capture/research_roots/project_states/research_projects/workspaces/fs_workspaces/modules/writing_contexts')
     if 'workspaces' in raw:
         if 'research_projects' in raw and raw['workspaces']!=raw['research_projects']:raise ValueError('workspaces与research_projects配置冲突')
         raw['research_projects']=raw['workspaces']
@@ -103,7 +103,9 @@ def load_settings(neutral=False):
     if not isinstance(states, dict) or any(not isinstance(k,str) or not re.fullmatch(r'[a-z0-9_-]{1,80}',k) or v not in ('active','paused') for k,v in states.items()):
         raise ValueError('project_states必须是项目ID到active/paused的对象')
     fs_workspaces=collect_fs_workspaces(research,raw.get('fs_workspaces'),path)
-    return {'research_projects':research, 'game_repositories':{}, 'project_states':states, 'research_roots': evidence_roots, 'pucatch':configured, 'capture':configured, 'modules':list(modules_raw), 'data_dir': data, 'projects_dir': projects, 'projects': registered, 'books_root': books,
+    from writing_context import validate_bindings
+    writing_contexts=validate_bindings(raw.get('writing_contexts', {}), fiction_ids)
+    return {'writing_contexts':writing_contexts, 'research_projects':research, 'game_repositories':{}, 'project_states':states, 'research_roots': evidence_roots, 'pucatch':configured, 'capture':configured, 'modules':list(modules_raw), 'data_dir': data, 'projects_dir': projects, 'projects': registered, 'books_root': books,
             'collections': {key: path(value) for key, value in supplied.items()},'fs_workspaces':fs_workspaces}
 
 

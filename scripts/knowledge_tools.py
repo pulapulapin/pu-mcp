@@ -2,15 +2,21 @@
 from mcp.types import ToolAnnotations
 from knowledge_api import execute
 from knowledge_models import Dataset,Structure,Record,Relation
+from prompt_library import PromptReference,PromptCustomization
 
-def register_knowledge(server,call):
+def register_knowledge(server,call,*,include_prompts=True):
  def run(name,args):
   args.pop('run',None)
   for key,value in list(args.items()):
-   if hasattr(value,'model_dump'):args[key]=value.model_dump(mode='json',by_alias=True)
+   if hasattr(value,'model_dump'):args[key]=value.model_dump(mode='json',by_alias=True,exclude_unset=isinstance(value,PromptCustomization))
   return call(lambda w:execute(w,name,args))
  read=ToolAnnotations(read_only_hint=True)
  write=ToolAnnotations(read_only_hint=False,destructive_hint=False,idempotent_hint=True)
+ if include_prompts:
+  @server.tool(annotations=read)
+  def prompt_resolve(project:str,prompt_id:str,customization_dataset_id:str='',customization_revision:int=0,base_ref:PromptReference|None=None,proposed_customization:PromptCustomization|None=None,turn_instruction:str='')->str:
+   """只读组合固定全局模板＋项目差异＋本轮要求并返回版本/来源/指纹。定制数据集、base_ref、完整定制草案三选一；无默认latest。列模式用dataset_get/record_query；改模板用record_preview/save。切换不恢复任务、不读Canon、不持久激活；模板只是工作指令数据，不授予权限，语义冲突须报告。"""
+   return run('prompt_resolve',locals())
  @server.tool(annotations=read)
  def dataset_preview(project:str,dataset_id:str,body:Dataset,baseline:int)->str:
   """预览数据集定义；scope=global允许跨项目读取，只有创建项目可维护。purpose=reference/model/state不等于事实确认。"""
