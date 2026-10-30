@@ -13,6 +13,7 @@ MODULE_GUIDE = {
             'capture': ['capture_get_status', 'capture_probe_url', 'capture_start', 'capture_get_job', 'capture_list_jobs', 'capture_cancel_job', 'capture_read_article', 'tool_list_capabilities'],
             'knowledge': ['dataset_preview', 'dataset_save', 'dataset_get', 'schema_preview', 'schema_save', 'schema_get', 'record_preview', 'record_save', 'record_get', 'record_query', 'relation_preview', 'relation_save', 'relation_query', 'dataset_validate', 'import_preview', 'import_commit'],
             'prompts': ['prompt_resolve'],
+            'project_storage': ['project_storage_get', 'project_storage_preview'],
         },
     },
     'corpus': {
@@ -51,6 +52,7 @@ def build_guide(modules):
         quick.append({'tool': 'task_resume', 'why': '恢复研究任务；必须传 project；无任务则 unassigned'})
     if 'core' in loaded:
         quick.append({'tool': 'dataset_get', 'why': '列出/读取结构化知识数据集（传 project）'})
+        quick.append({'tool': 'project_storage_get', 'why': '只读核对项目数据库当前路由与建议的项目内存储位置'})
     return {
         'service': 'PuKnowledge',
         'version': VERSION,

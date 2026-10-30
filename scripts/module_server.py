@@ -83,6 +83,8 @@ def register_core(server):
     # task recovery keeps its narrower research-workspace scope.
     register_evidence(registration, knowledge_call)
     register_knowledge(server, knowledge_call)
+    from project_storage_tools import register_project_storage
+    register_project_storage(server)
 
 
 def register_research_compat(server):
