@@ -5,6 +5,10 @@
 - Add read-only `project_storage_get` and `project_storage_preview` tools that
   calculate a project-local `.puknowledge/workspace.sqlite3` target, project-owned
   migration closure and global dependencies without copying data or changing routing.
+- Add exact-preview `project_storage_shadow_copy` and read-only
+  `project_storage_verify`; project rows and pinned research-source dependencies must
+  match normalized table fingerprints, SQLite integrity and foreign-key checks before
+  a shadow copy succeeds. Runtime routing remains unchanged.
 - Add read-only `story_plan_bootstrap` to return the exact supported Schema Pack,
   a real schema preview fingerprint and save arguments; incompatible nonempty
   datasets are blocked and no schema is saved automatically.

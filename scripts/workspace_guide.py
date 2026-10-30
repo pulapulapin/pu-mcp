@@ -13,7 +13,8 @@ MODULE_GUIDE = {
             'capture': ['capture_get_status', 'capture_probe_url', 'capture_start', 'capture_get_job', 'capture_list_jobs', 'capture_cancel_job', 'capture_read_article', 'tool_list_capabilities'],
             'knowledge': ['dataset_preview', 'dataset_save', 'dataset_get', 'schema_preview', 'schema_save', 'schema_get', 'record_preview', 'record_save', 'record_get', 'record_query', 'relation_preview', 'relation_save', 'relation_query', 'dataset_validate', 'import_preview', 'import_commit'],
             'prompts': ['prompt_resolve'],
-            'project_storage': ['project_storage_get', 'project_storage_preview'],
+            'project_storage': ['project_storage_get', 'project_storage_preview',
+                                'project_storage_shadow_copy', 'project_storage_verify'],
         },
     },
     'corpus': {
