@@ -84,11 +84,11 @@ cp config/workspace.example.json config/workspace.local.json
 
 ### Candidate story planning (development)
 
-With `longform` enabled, `story_plan_get`, `story_plan_preview` and
-`story_plan_save` manage a bounded candidate graph using existing private
-Dataset/Schema/Record/Relation versions. Initialize an explicitly authorized
-project-private model dataset and the [schema pack](config/schemas/story-planning.json)
-through the existing preview/save tools. Nothing is initialized automatically.
+With `longform` enabled, `story_plan_bootstrap` returns and previews the exact
+supported Schema Pack without saving it. `story_plan_get`, `story_plan_preview`
+and `story_plan_save` manage a bounded candidate graph using existing private
+Dataset/Schema/Record/Relation versions. Initialization still requires a
+separately authorized `schema_save`; nothing is initialized automatically.
 This feature does not modify manuscripts or Canon. `story_chapter_context` reads
 a bounded fixed graph scope, and `story_consistency_review` checks only explicit
 comparable time/location/state assertions. External source aggregation, semantic

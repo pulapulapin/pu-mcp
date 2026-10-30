@@ -13,8 +13,11 @@ or imported by this change. Do not import private Git history or screenshots.
 ## First batch
 
 A project-private purpose=model dataset and story_node schema must first be
-explicitly previewed/saved using existing tools. The schema pack is distributed
-in config/schemas/story-planning.json; nothing is created on read.
+explicitly previewed/saved. `story_plan_bootstrap` returns the exact normalized
+Schema Pack, current schema reference and diff, and a real preview fingerprint
+plus `schema_save` arguments. It never saves. A nonempty incompatible dataset is
+BLOCKED rather than silently migrated. The pack is also distributed in
+config/schemas/story-planning.json.
 
 story_plan_get reads a fixed dataset snapshot (0 resolves latest once). Pagination
 returns the resolved dataset_revision, which clients must reuse. Nodes and edges

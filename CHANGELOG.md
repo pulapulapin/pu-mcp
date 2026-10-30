@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Add read-only `story_plan_bootstrap` to return the exact supported Schema Pack,
+  a real schema preview fingerprint and save arguments; incompatible nonempty
+  datasets are blocked and no schema is saved automatically.
 - Add optional longform candidate story graph read/preview/save, reusing private Knowledge datasets and atomic version commits.
 - Report explicit dependency impact paths and stale endpoints without promoting candidates to Canon.
 - Add version-pinned chapter graph context and conservative time/location/state

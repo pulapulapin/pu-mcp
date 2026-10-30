@@ -5,6 +5,7 @@ import unittest
 from pathlib import Path
 from tests import test_knowledge_data as fixtures
 from story_planning import StoryPlanning, SCHEMA
+from knowledge_models import Structure
 
 
 class StoryPlanningTests(unittest.TestCase):
@@ -16,6 +17,10 @@ class StoryPlanningTests(unittest.TestCase):
         self.save('schema', 'story_node', SCHEMA, dataset='plan')
         self.plan = StoryPlanning(self.w)
 
+    def setup_empty_plan(self):
+        self.save('dataset', 'plan', {'title': 'Synthetic plan', 'scope': 'project', 'purpose': 'model'}, dataset='plan')
+        self.plan = StoryPlanning(self.w)
+
     def test_distributed_schema_matches_runtime_contract(self):
         pack = json.loads((Path(__file__).resolve().parents[1] /
                            'config/schemas/story-planning.json').read_text())
@@ -25,6 +30,44 @@ class StoryPlanningTests(unittest.TestCase):
         project = tomllib.loads((Path(__file__).resolve().parents[1] / 'pyproject.toml').read_text())
         modules = set(project['tool']['setuptools']['py-modules'])
         self.assertTrue({'story_planning', 'story_planning_tools'} <= modules)
+
+    def test_bootstrap_returns_exact_preview_and_enables_story_save(self):
+        self.setup_empty_plan()
+        bootstrap = self.plan.bootstrap('owner', 'plan')
+        self.assertEqual(bootstrap['state'], 'PREVIEW_READY')
+        self.assertEqual(bootstrap['schema_pack'], Structure.model_validate(SCHEMA).model_dump(mode='json'))
+        self.assertFalse(bootstrap['saved'])
+        args = bootstrap['schema_save_arguments']
+        saved = self.k.save(kind='schema', operation_key='schema', **args)
+        ready = self.plan.bootstrap('owner', 'plan')
+        self.assertEqual(ready['state'], 'READY')
+        self.assertTrue(ready['compatible'])
+        self.assertEqual(ready['current_schema_ref']['revision'], saved['revision'])
+        chapter = {'nodes': [self.node('chapter-27', 'chapter')]}
+        preview = self.plan.preview('owner', 'plan', saved['dataset_revision'], chapter)
+        result = self.plan.save('owner', 'plan', saved['dataset_revision'], chapter,
+                                preview['preview_fingerprint'], 'chapter')
+        self.assertEqual(self.plan.chapter_context('owner', 'plan', 'chapter-27',
+                                                   result['dataset_revision'])['state'], 'READY')
+
+    def test_bootstrap_previews_incompatible_empty_schema_but_blocks_nonempty(self):
+        self.setup_empty_plan()
+        wrong = {'fields': {'title': {'type': 'string'}}, 'allowed_relations': []}
+        preview = self.k.preview('owner', 'schema', 'plan', 'story_node', wrong, 1)
+        saved = self.k.save('owner', 'schema', 'plan', 'story_node', wrong, 1,
+                            preview['preview_fingerprint'], 'wrong-schema')
+        result = self.plan.bootstrap('owner', 'plan')
+        self.assertEqual(result['state'], 'PREVIEW_READY')
+        self.assertIn('kind', result['diff']['missing_fields'])
+        body = {'record_type': 'story_node', 'schema_revision': saved['revision'],
+                'values': {'title': 'legacy'}, 'status': 'candidate', 'evidence': []}
+        record_preview = self.k.preview('owner', 'record', 'plan', 'legacy', body,
+                                        saved['dataset_revision'])
+        self.k.save('owner', 'record', 'plan', 'legacy', body, saved['dataset_revision'],
+                    record_preview['preview_fingerprint'], 'legacy')
+        blocked = self.plan.bootstrap('owner', 'plan')
+        self.assertEqual(blocked['state'], 'BLOCKED')
+        self.assertNotIn('schema_save_arguments', blocked)
 
     def commit(self, changes, key='graph'):
         baseline = self.k.revision('plan')
@@ -147,9 +190,10 @@ class StoryPlanningTests(unittest.TestCase):
                 async with ClientSession(read, write) as session:
                     await session.initialize()
                     tools = {t.name: t for t in (await session.list_tools()).tools}
-                    self.assertTrue({'story_plan_get', 'story_plan_preview', 'story_plan_save',
+                    self.assertTrue({'story_plan_bootstrap', 'story_plan_get', 'story_plan_preview', 'story_plan_save',
                                      'story_chapter_context', 'story_consistency_review'} <= set(tools))
                     self.assertTrue(tools['story_plan_get'].annotations.read_only_hint)
+                    self.assertTrue(tools['story_plan_bootstrap'].annotations.read_only_hint)
                     self.assertTrue(tools['story_chapter_context'].annotations.read_only_hint)
                     self.assertTrue(tools['story_consistency_review'].annotations.read_only_hint)
                     async def call(name, args):
@@ -158,6 +202,8 @@ class StoryPlanningTests(unittest.TestCase):
                         data = json.loads(r.content[0].text)
                         self.assertTrue(data['ok'], data)
                         return data['result']
+                    bootstrap = await call('story_plan_bootstrap', {'project': 'owner', 'dataset_id': 'plan'})
+                    self.assertEqual(bootstrap['state'], 'READY')
                     args = {'project': 'owner', 'dataset_id': 'plan', 'baseline': 2,
                             'change_set': {'nodes': [self.node('a', 'chapter')]}}
                     p = await call('story_plan_preview', args)

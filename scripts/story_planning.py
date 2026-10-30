@@ -116,6 +116,74 @@ class StoryPlanning:
                                   'endpoint': endpoint})
         return nodes, edges, stale
 
+    @staticmethod
+    def _schema_diff(current, expected):
+        current = current or {'fields': {}, 'allowed_relations': []}
+        current_fields = current.get('fields', {})
+        expected_fields = expected['fields']
+        return {
+            'missing_fields': sorted(set(expected_fields) - set(current_fields)),
+            'extra_fields': sorted(set(current_fields) - set(expected_fields)),
+            'changed_fields': [key for key in sorted(set(current_fields) & set(expected_fields))
+                               if current_fields[key] != expected_fields[key]],
+            'missing_relations': sorted(set(expected['allowed_relations']) -
+                                        set(current.get('allowed_relations', []))),
+            'extra_relations': sorted(set(current.get('allowed_relations', [])) -
+                                      set(expected['allowed_relations'])),
+        }
+
+    def bootstrap(self, project, dataset_id):
+        """Preview the exact supported story schema without persisting it."""
+        with self.k.store.connection() as db:
+            self._access(db, project, dataset_id)
+            version = self.k.revision(dataset_id, db)
+            records = self.k._latest(db, 'record', dataset_id, version)
+            relations = self.k._latest(db, 'relation', dataset_id, version)
+            schemas = {row['object_id']: row for row in self.k._latest(db, 'schema', dataset_id, version)}
+            current = schemas.get('story_node')
+            current_body = current['body'] if current else None
+            compatible = current_body == Structure.model_validate(SCHEMA).model_dump(mode='json')
+            current_ref = None if current is None else {
+                'id': 'story_node', 'revision': current['revision'],
+                'fingerprint': current['fingerprint'],
+                'dataset_revision': current['commit_revision'],
+            }
+        expected = Structure.model_validate(SCHEMA).model_dump(mode='json')
+        result = {
+            'state': 'READY' if compatible else 'PREVIEW_READY',
+            'dataset_id': dataset_id, 'dataset_revision': version,
+            'schema_id': 'story_node', 'schema_pack': expected,
+            'schema_pack_fingerprint': digest(encode(expected)),
+            'current_schema_ref': current_ref,
+            'compatible': compatible,
+            'initialization_required': not compatible,
+            'diff': self._schema_diff(current_body, expected),
+            'record_count': len(records), 'relation_count': len(relations),
+            'canon': False, 'saved': False,
+        }
+        if compatible:
+            result['next_action'] = 'Use story_plan_preview with this dataset revision.'
+            return result
+        if records or relations:
+            result.update({
+                'state': 'BLOCKED',
+                'next_action': 'Use a new empty project-private model dataset or explicitly migrate existing objects.',
+                'issues': [{'code': 'incompatible_nonempty_dataset',
+                            'reason': 'Schema bootstrap will not be offered for a nonempty incompatible dataset.'}],
+            })
+            return result
+        preview = self.k.preview(project, 'schema', dataset_id, 'story_node', expected, version)
+        result.update({
+            'schema_preview': preview,
+            'schema_save_arguments': {
+                'project': project, 'dataset_id': dataset_id, 'object_id': 'story_node',
+                'body': expected, 'baseline': version,
+                'preview_fingerprint': preview['preview_fingerprint'],
+            },
+            'next_action': 'Review this preview, then call schema_save with these arguments and a unique operation_key.',
+        })
+        return result
+
     def get(self, project, dataset_id, dataset_revision=0, offset=0, limit=50):
         if any(type(x) is not int or x < 0 for x in (dataset_revision, offset)) or type(limit) is not int or not 1 <= limit <= 50:
             raise ValueError('invalid snapshot or page')

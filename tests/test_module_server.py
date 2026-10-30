@@ -25,7 +25,7 @@ LONGFORM_PUBLIC = {
     'library_list_books', 'library_index_book', 'library_get_structure', 'library_read_excerpt',
     'library_search', 'library_register_book', 'library_set_active', 'library_inspect_file',
     'library_get_progress', 'library_record_progress',
-    'story_plan_get', 'story_plan_preview', 'story_plan_save',
+    'story_plan_bootstrap', 'story_plan_get', 'story_plan_preview', 'story_plan_save',
     'story_chapter_context', 'story_consistency_review',
 }
 

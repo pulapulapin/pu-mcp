@@ -14,6 +14,11 @@ def register_story_planning(server):
             return json.dumps({'ok': False, 'error': str(exc)}, ensure_ascii=False)
 
     @server.tool(annotations=ToolAnnotations(read_only_hint=True))
+    def story_plan_bootstrap(project: str, dataset_id: str) -> str:
+        """Return and preview the exact supported story_node Schema Pack for an empty project-private model dataset. Never saves or overwrites schema; use returned arguments with schema_save only after review and authorization."""
+        return call('bootstrap', project=project, dataset_id=dataset_id)
+
+    @server.tool(annotations=ToolAnnotations(read_only_hint=True))
     def story_plan_get(project: str, dataset_id: str, dataset_revision: int = 0,
                        offset: int = 0, limit: int = 50) -> str:
         """Read a project-private candidate graph snapshot. Reuse returned dataset_revision for pagination; no Canon or complete-context claim."""

@@ -34,6 +34,7 @@ must never contain a default private project.
 | Draft/Markdown quote verification | Available | Ported in this batch | Public longform/fs |
 | Neutral corpus indexing and exact reads | Available | Ported in this batch | Public optional corpus extension |
 | Candidate story graph and dependency impact paths | Implemented and host-discovered | Implemented on public feature branch | Same generic protocol; real project data remains private |
+| Read-only story Schema bootstrap preview | Implemented; host refresh pending | Implemented on public feature branch | Exact pack and preview fingerprint; save remains separately authorized |
 | Chapter-specific story graph context | Implemented and host-discovered | Implemented on public feature branch | Bounded candidate-graph context; external sources remain separate |
 | Rule-based time/location/knowledge continuity | Implemented and host-discovered | Implemented on public feature branch | Conservative explicit-fact checks; unknowns stay insufficient evidence |
 | Game repository/handoff tools | Private domain extension | Excluded | Keep private unless separately generalized |
@@ -48,7 +49,7 @@ only when public scope, migration notes, packaging and host acceptance are ready
 
 ## Verification for this synchronization batch
 
-The public repository passes 264 tests. The verified scope includes prompt,
+The public repository passes 266 tests. The verified scope includes prompt,
 writing context, quote anchoring, source mapping, corpus, story planning,
 chapter-specific graph context and conservative continuity review, plus real
 stdio protocol tests using temporary projects. Tests do not read any private

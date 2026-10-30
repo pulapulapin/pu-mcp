@@ -25,8 +25,8 @@ MODULE_GUIDE = {
     },
     'longform': {
         'purpose': '长文/文本项目：方向恢复、交接快照、草稿、参考书',
-        'first': ['writing_get_context', 'writing_resume', 'writing_list_snapshots', 'draft_list', 'library_list_books'],
-        'groups': {'candidate_story_graph': ['story_plan_get', 'story_plan_preview', 'story_plan_save',
+        'first': ['writing_get_context', 'writing_resume', 'story_plan_bootstrap', 'writing_list_snapshots', 'draft_list', 'library_list_books'],
+        'groups': {'candidate_story_graph': ['story_plan_bootstrap', 'story_plan_get', 'story_plan_preview', 'story_plan_save',
                                              'story_chapter_context', 'story_consistency_review']},
     },
 }
@@ -46,6 +46,7 @@ def build_guide(modules):
     if 'longform' in loaded:
         quick.append({'tool': 'writing_get_context', 'why': '创作前核对Prompt、来源版本、当前任务及恢复状态'})
         quick.append({'tool': 'writing_resume', 'why': '兼容任务与历史检查点恢复；不等于已读取全部外部资料'})
+        quick.append({'tool': 'story_plan_bootstrap', 'why': '只读取得并预览准确故事Schema Pack；保存仍须schema_save及明确授权'})
     else:
         quick.append({'tool': 'task_resume', 'why': '恢复研究任务；必须传 project；无任务则 unassigned'})
     if 'core' in loaded:
