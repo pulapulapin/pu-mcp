@@ -55,11 +55,13 @@ class DocumentRange(Model):
 class Binding(Model):
     prompt_dataset_id: Identifier
     prompt_ids: list[Identifier] = Field(min_length=1, max_length=20)
-    documents: list[Document] = Field(min_length=1, max_length=40)
+    documents: list[Document] = Field(default_factory=list, max_length=40)
     records: list[Record] = Field(default_factory=list, max_length=40)
 
     @model_validator(mode='after')
     def unique(self):
+        if not self.documents and not self.records:
+            raise ValueError('恢复清单须至少登记一个文件或记录来源')
         ids = [x.id for x in [*self.documents, *self.records]]
         if len(ids) != len(set(ids)) or len(self.prompt_ids) != len(set(self.prompt_ids)):
             raise ValueError('恢复来源/模式ID不可重复')
@@ -119,7 +121,7 @@ def creative_workflow(prompt_id):
                    '版本核验通过不等于正文改善；未读全文不作全篇结论。']}
 
 
-def record_bindings(binding, task, blind_review, issue):
+def record_bindings(binding, task, blind_review, issue, project):
     """Task pins supplement the manifest; they never grant access beyond Knowledge."""
     if blind_review:
         return []
@@ -127,14 +129,25 @@ def record_bindings(binding, task, blind_review, issue):
     task_pins = {}
     used_ids = {x.id for x in [*binding.documents, *binding.records]}
     for index, ref in enumerate(task.get('references', [])):
-        if not isinstance(ref, dict) or ref.get('kind') != 'project_record':
+        if not isinstance(ref, dict):
+            continue
+        kinds = {value for value in (ref.get('kind'), ref.get('type')) if value is not None}
+        if len(kinds) > 1:
+            issue('task-reference-' + str(index), '当前任务引用的kind/type冲突；不能静默选择。')
+            continue
+        if kinds != {'project_record'}:
             continue  # Legacy path/URL/opaque references are not permission to fetch arbitrary content.
         sid = 'task-reference-' + str(index)
         while sid in used_ids:
             sid += '-task'
         try:
+            if ref.get('project') not in (None, project):
+                raise ValueError('当前任务引用声明了其他项目，不能跨项目恢复')
+            record_ids = {value for value in (ref.get('object_id'), ref.get('record_id')) if value is not None}
+            if len(record_ids) != 1:
+                raise ValueError('当前任务引用缺少唯一record_id/object_id')
             source = Record.model_validate({
-                'id': sid, 'dataset_id': ref.get('dataset_id'), 'record_id': ref.get('object_id'),
+                'id': sid, 'dataset_id': ref.get('dataset_id'), 'record_id': next(iter(record_ids)),
                 'revision': ref.get('revision'), 'fingerprint': ref.get('fingerprint'),
                 'authority': 'working_reference', 'required': True})
             key = (source.dataset_id, source.record_id)
@@ -203,7 +216,7 @@ def recover(w, project, prompt_id='', max_chars=140000, source_ids=None, documen
         return result
     binding = Binding.model_validate(raw)
     blind_review = prompt_id == 'reader-reviewer'
-    records = record_bindings(binding, task, blind_review, issue)
+    records = record_bindings(binding, task, blind_review, issue, project)
     documents = [x for x in binding.documents
                  if not (prompt_id and prompt_id in x.exclude_modes)
                  and not (blind_review and x.authority != 'working_manuscript')]

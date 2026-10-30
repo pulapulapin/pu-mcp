@@ -19,6 +19,14 @@ continuity tests plus real stdio calls. Existing subprocess tests use the active
 Python interpreter rather than assuming a checkout-local virtualenv. No package
 release, real Chat host test or production project import was performed.
 
+2026-10-31 recovery parity batch: explicit manifests may be record-only but not
+empty; persisted task references accept the documented `type`/`record_id` names
+as well as legacy `kind`/`object_id`, reject conflicting aliases and foreign
+project declarations, and remain version pinned. Projects with an explicit
+recovery manifest no longer receive the legacy JSON story view in default
+`writing_resume`/`writing_get_context` responses; legacy structure remains
+available through separate structure tools. Public synthetic suite: 275 passed.
+
 2026-10-30 parity batch: generic Prompt resolution, writing-context recovery,
 source selection/ranges/maps/fact anchors, quote verification and neutral corpus
 indexing were ported from the private 0.4.10 behavioral reference. Public full

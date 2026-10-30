@@ -271,6 +271,29 @@ class RecoveryTests(PromptFixture):
         self.assertTrue(r['records'][0]['newer_revision_available'])
         self.assertFalse(r['records'][0]['record']['canon'])
 
+    def test_saved_snapshot_type_and_record_id_aliases_restore_exact_record(self):
+        ref = self.work_reference('Pinned through persisted snapshot field names')
+        ref = {'type': ref['kind'], 'dataset_id': ref['dataset_id'],
+               'record_id': ref['object_id'], 'revision': ref['revision'],
+               'fingerprint': ref['fingerprint'], 'project': 'a'}
+        self.task_refs([ref])
+        r = self.call()
+        self.assertEqual(r['state'], 'READY')
+        self.assertEqual(len(r['records']), 1)
+        self.assertEqual(r['records'][0]['record']['object_id'], 'rules')
+        self.assertEqual(r['records'][0]['binding_source'], 'task_snapshot')
+
+    def test_record_only_manifest_is_valid_but_fully_empty_manifest_is_not(self):
+        from writing_context import Binding
+        ref = self.work_reference('Record-only recovery')
+        record = {'id': 'rules', 'dataset_id': ref['dataset_id'],
+                  'record_id': ref['object_id'], 'revision': ref['revision'],
+                  'fingerprint': ref['fingerprint'], 'authority': 'working_reference'}
+        binding = Binding.model_validate({**self.binding, 'documents': [], 'records': [record]})
+        self.assertEqual(binding.documents, [])
+        with self.assertRaises(ValueError):
+            Binding.model_validate({**self.binding, 'documents': [], 'records': []})
+
     def test_task_reference_cannot_cross_project_or_guess_missing_version(self):
         for ref in [dict(kind='project_record', dataset_id='b-prompts', object_id='secret', revision=1, fingerprint='0'*64),
                     dict(kind='project_record', dataset_id='a-prompts', object_id='novel-writer', fingerprint='0'*64)]:
@@ -397,7 +420,7 @@ class RecoveryTests(PromptFixture):
         self.assertNotIn('New story direction', json.dumps(result))
         self.assertNotIn('No approved new plot', json.dumps(result))
 
-    def test_tool_budget_includes_legacy_context_envelope(self):
+    def test_configured_recovery_budget_excludes_legacy_context_envelope(self):
         cfg = json.loads(self.config.read_text()); cfg['writing_contexts'] = {'a': self.binding}
         self.config.write_text(json.dumps(cfg))
         contract = self.root / 'a' / 'story-contract.json'
@@ -406,5 +429,21 @@ class RecoveryTests(PromptFixture):
         server = ToolRegistry(); register_longform(server)
         result = json.loads(asyncio.run(server.call_tool(
             'writing_get_context', {'project': 'a', 'max_chars': 20000})))
-        self.assertNotEqual(result['recovery']['state'], 'READY')
-        self.assertFalse(result['recovery']['delivery_complete'])
+        self.assertEqual(result['recovery']['state'], 'READY')
+        self.assertTrue(result['recovery']['delivery_complete'])
+        self.assertEqual(result['context'], {'omitted_by_recovery_manifest': True})
+        self.assertNotIn('x' * 100, json.dumps(result))
+
+    def test_configured_recovery_omits_legacy_json_from_context_and_resume(self):
+        cfg = json.loads(self.config.read_text()); cfg['writing_contexts'] = {'a': self.binding}
+        self.config.write_text(json.dumps(cfg))
+        contract = self.root / 'a' / 'story-contract.json'
+        body = json.loads(contract.read_text()); body['logline'] = 'obsolete legacy direction'
+        contract.write_text(json.dumps(body))
+        server = ToolRegistry(); register_longform(server)
+        context = json.loads(asyncio.run(server.call_tool('writing_get_context', {'project': 'a'})))
+        self.assertEqual(context['context'], {'omitted_by_recovery_manifest': True})
+        self.assertNotIn('obsolete legacy direction', json.dumps(context))
+        resumed = json.loads(asyncio.run(server.call_tool('writing_resume', {'project': 'a'})))
+        self.assertEqual(resumed['context'], {'omitted_by_recovery_manifest': True})
+        self.assertNotIn('obsolete legacy direction', json.dumps(resumed))

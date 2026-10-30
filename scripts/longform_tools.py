@@ -127,8 +127,12 @@ def register_longform(server, aliases=False):
         """只读恢复。source_ids选材料，document_ranges选正文范围。include_source_map返回标题来源索引。source_facts候选项含id/source_id/expected_fingerprint/kind(story_contract|character|timeline)/entity_id/field/value/quote，可选start_char/status_quote；仅核对引文，不认证含义或批准、不写入。"""
         try:
             from writing_context import recover
-            payload = novel_mcp.get_context(project)
-            recovery = recover(Workbench(project_id=project), project, prompt_id, max_chars, source_ids, document_ranges,
+            workbench = Workbench(project_id=project)
+            configured_recovery = project in workbench.settings.get('writing_contexts', {})
+            payload = ({'project': project, 'path': str(workbench.project(project)),
+                        'context': {'omitted_by_recovery_manifest': True}, 'next_task': None}
+                       if configured_recovery else novel_mcp.get_context(project))
+            recovery = recover(workbench, project, prompt_id, max_chars, source_ids, document_ranges,
                                include_source_map, source_facts)
             if source_ids is not None:
                 payload['context'] = {'omitted_by_request': True}
@@ -137,13 +141,16 @@ def register_longform(server, aliases=False):
                 payload['context'] = {}
                 payload['next_task'] = None
             result = {'ok': True, **payload, 'recovery': recovery,
-                          'project_next_task': payload['next_task'],
+                          'project_next_task': ({'omitted_by_recovery_manifest': True}
+                                                if configured_recovery else payload['next_task']),
                           'next_task': {'label': task['stage'], 'instruction': task['task'],
                                         'next_step': task['next_step'], 'task_id': task['task_id'],
                                         'state': task['task_state'], 'direction_revision': task['direction_revision'],
                                         'automatic_development_allowed': task['automatic_development_allowed']},
                           'next_task_source': task['resume_mode'],
-                          'context_scope': 'context为旧JSON视图，recovery为显式来源恢复；二者不互相替代。'}
+                          'context_scope': ('已配置显式恢复清单；旧JSON兼容视图不进入默认响应，可通过结构工具单独核对。'
+                                            if configured_recovery else
+                                            'context为旧JSON视图，recovery为显式来源恢复；二者不互相替代。')}
             if len(_dump(result)) > max_chars:
                 if recovery['state'] == 'READY':
                     recovery['state'] = 'PARTIAL'
@@ -160,7 +167,12 @@ def register_longform(server, aliases=False):
     def writing_resume(project: str, session_id: str = '') -> str:
         """按最高direction_revision或指定session_id恢复同源任务/阶段/下一步；须显式project。不恢复宿主完整聊天。"""
         try:
-            return _dump({'ok': True, **novel_mcp.start_session(project), **Workbench(project_id=project).resume(project, session_id)})
+            workbench = Workbench(project_id=project)
+            configured_recovery = project in workbench.settings.get('writing_contexts', {})
+            legacy = ({'project': project, 'path': str(workbench.project(project)),
+                       'context': {'omitted_by_recovery_manifest': True}}
+                      if configured_recovery else novel_mcp.start_session(project))
+            return _dump({'ok': True, **legacy, **workbench.resume(project, session_id)})
         except Exception as exc:
             return _fail(exc)
 
