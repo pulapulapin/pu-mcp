@@ -10,6 +10,7 @@ from knowledge_api import workspace
 from knowledge_data import Knowledge
 from longform_tools import _proposal_wb
 from novel_workbench import Workbench
+from project_storage import ProjectStorage
 
 
 class ProjectStoreRoutingTests(unittest.TestCase):
@@ -62,6 +63,10 @@ class ProjectStoreRoutingTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, '项目库不能创建'):
             routed.preview('story', 'dataset', 'global-model', 'global-model',
                            {'title': 'Global', 'scope': 'global', 'purpose': 'model'}, 0)
+        storage = ProjectStorage(workspace())
+        sync = storage.sync_preview('story')
+        self.assertEqual(sync['state'], 'BLOCKED')
+        self.assertTrue(any(x['code'] == 'active_full_sync_forbidden' for x in sync['issues']))
 
     def test_shadow_binding_keeps_runtime_on_shared_store(self):
         self.write('shadow')

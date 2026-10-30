@@ -275,6 +275,8 @@ class ProjectStorage:
             foreign_keys = [dict(row) for row in db.execute('PRAGMA foreign_key_check')]
             target_closure = self._closure(db, project)
             target_manifest = self._closure_manifest(target_closure)
+        routing = self.get(project)
+        matches = (integrity == 'ok' and not foreign_keys and source_manifest == target_manifest)
         return {
             'project': project,
             'target_store': str(target),
@@ -282,9 +284,15 @@ class ProjectStorage:
             'foreign_key_issues': foreign_keys,
             'source_manifest': source_manifest,
             'target_manifest': target_manifest,
-            'matches_source': (integrity == 'ok' and not foreign_keys and
-                               source_manifest == target_manifest),
-            'routing_changed': self.get(project)['routing_changed'],
+            'matches_source': matches,
+            'matches_legacy_source': matches,
+            'verification_state': ('ACTIVE_HEALTHY' if routing['routing_changed'] and
+                                   integrity == 'ok' and not foreign_keys else
+                                   'ACTIVE_INVALID' if routing['routing_changed'] else
+                                   'SHADOW_MATCH' if matches else 'SHADOW_DIVERGED'),
+            'expected_divergence_after_cutover': bool(routing['routing_changed'] and not matches),
+            'source_role': 'legacy_rollback_baseline' if routing['routing_changed'] else 'active_shared_source',
+            'routing_changed': routing['routing_changed'],
         }
 
     def sync_preview(self, project):
@@ -304,6 +312,9 @@ class ProjectStorage:
             'writes_performed': False,
         }
         issues = []
+        if status['routing_changed']:
+            issues.append({'code': 'active_full_sync_forbidden',
+                           'reason': 'Active project data is authoritative; full sync from the legacy central store could overwrite newer project versions.'})
         if verification['target_integrity'] != 'ok':
             issues.append({'code': 'target_integrity_failed'})
         if verification['foreign_key_issues']:

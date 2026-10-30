@@ -13,6 +13,9 @@
   rollback files, and project-aware routing for drafts, snapshots, private datasets,
   story graphs and evidence. Global dataset replicas are read-only; shared books and
   unscoped global operations remain on the central store.
+- Block full legacy-to-project sync after activation; verification treats central
+  project rows as a rollback baseline so expected post-cutover divergence is not
+  misreported as database corruption.
 - Add read-only `story_plan_bootstrap` to return the exact supported Schema Pack,
   a real schema preview fingerprint and save arguments; incompatible nonempty
   datasets are blocked and no schema is saved automatically.
