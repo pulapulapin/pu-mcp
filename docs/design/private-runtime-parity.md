@@ -34,8 +34,8 @@ must never contain a default private project.
 | Draft/Markdown quote verification | Available | Ported in this batch | Public longform/fs |
 | Neutral corpus indexing and exact reads | Available | Ported in this batch | Public optional corpus extension |
 | Candidate story graph and dependency impact paths | Not loaded in current Chat | Implemented on public feature branch | Back-port only after public review; no production activation yet |
-| Chapter-specific story graph context | Not complete | Not complete | Next generic batch |
-| Rule-based time/location/knowledge continuity | Not complete | Not complete | Next generic batch |
+| Chapter-specific story graph context | Not loaded in current Chat | Implemented on public feature branch | Bounded candidate-graph context; external sources remain separate |
+| Rule-based time/location/knowledge continuity | Not loaded in current Chat | Implemented on public feature branch | Conservative explicit-fact checks; unknowns stay insufficient evidence |
 | Game repository/handoff tools | Private domain extension | Excluded | Keep private unless separately generalized |
 | Voice experiments | Private domain extension | Excluded | Keep private |
 | D&D classification/research-card compatibility | Private/legacy domain behavior | Excluded from new generic migration | Use external domain pack if ever published |
@@ -48,11 +48,13 @@ only when public scope, migration notes, packaging and host acceptance are ready
 
 ## Verification for this synchronization batch
 
-The public repository passes 258 tests. The batch includes prompt, writing
-context, quote anchoring, source mapping, corpus and story-planning tests, plus
-real stdio protocol tests using temporary projects. Tests do not read any private
-project. Staged-content checks must reject real project names, user absolute paths,
-private remote references, credentials, databases and acceptance screenshots.
+The public repository passes 263 tests. The verified scope includes prompt,
+writing context, quote anchoring, source mapping, corpus, story planning,
+chapter-specific graph context and conservative continuity review, plus real
+stdio protocol tests using temporary projects. Tests do not read any private
+project. Staged-content checks must reject real project names, user absolute
+paths, private remote references, credentials, databases and acceptance
+screenshots.
 
 Passing tests prove bounded protocol behavior. They do not prove current Chat has
 refreshed tools, private project context is complete, a candidate is Canon, or the
@@ -61,10 +63,9 @@ explicit migration and host acceptance task.
 
 ## Next synchronization batch
 
-Build chapter context on the version-pinned candidate graph: selected chapter,
-explicit predecessors, character states at that story point, open setups and
-loaded/deferred/missing source coverage. Then add conservative continuity rules
-for comparable time ranges, mutually exclusive locations and explicit knowledge
-prerequisites. Missing assertions return `insufficient_evidence`. Use synthetic
-fixtures first; a real project import remains a separate private preview and
-authorization step.
+Integrate the version-pinned candidate graph with Prompt, current task and
+explicit external manuscript/Canon sources. The aggregate response must preserve
+per-source authority and version, distinguish loaded/deferred/missing coverage,
+and never promote candidates to Canon. A private runtime back-port, real project
+import and host refresh remain separate preview, authorization and acceptance
+steps.

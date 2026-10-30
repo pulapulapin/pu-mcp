@@ -50,6 +50,31 @@
       },
       "outcome": {
         "type": "string"
+      },
+      "story_order": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "time_domain": {
+        "type": "string"
+      },
+      "time_start": {
+        "type": "integer"
+      },
+      "time_end": {
+        "type": "integer"
+      },
+      "time_precision": {
+        "type": "string"
+      },
+      "location_exclusive": {
+        "type": "boolean"
+      },
+      "state_key": {
+        "type": "string"
+      },
+      "state_value": {
+        "type": "string"
       }
     },
     "allowed_relations": [

@@ -89,8 +89,10 @@ With `longform` enabled, `story_plan_get`, `story_plan_preview` and
 Dataset/Schema/Record/Relation versions. Initialize an explicitly authorized
 project-private model dataset and the [schema pack](config/schemas/story-planning.json)
 through the existing preview/save tools. Nothing is initialized automatically.
-This feature does not modify manuscripts or Canon. Chapter-context aggregation,
-semantic continuity and actual Chat host acceptance are not yet delivered.
+This feature does not modify manuscripts or Canon. `story_chapter_context` reads
+a bounded fixed graph scope, and `story_consistency_review` checks only explicit
+comparable time/location/state assertions. External source aggregation, semantic
+literary review and actual Chat host acceptance remain separate gates.
 See the [design and boundaries](docs/design/story-planning.md).
 
 ### Runtime parity policy

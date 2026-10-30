@@ -4,6 +4,8 @@
 
 - Add optional longform candidate story graph read/preview/save, reusing private Knowledge datasets and atomic version commits.
 - Report explicit dependency impact paths and stale endpoints without promoting candidates to Canon.
+- Add version-pinned chapter graph context and conservative time/location/state
+  consistency findings with explicit insufficient-evidence results.
 - Add synthetic 48-chapter and real stdio tests; chapter context and semantic continuity checks remain pending.
 - Port generic fixed-version Prompt resolution, explicit writing-context recovery,
   manuscript/source anchors and neutral corpus indexing from the local behavioral

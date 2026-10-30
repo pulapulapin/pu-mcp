@@ -33,3 +33,23 @@ def register_story_planning(server):
         return call('save', project=project, dataset_id=dataset_id, baseline=baseline,
                     change_set=change_set.model_dump(mode='json'),
                     preview_fingerprint=preview_fingerprint, operation_key=operation_key)
+
+    @server.tool(annotations=ToolAnnotations(read_only_hint=True))
+    def story_chapter_context(project: str, dataset_id: str, chapter_id: str,
+                              dataset_revision: int = 0, mode: str = 'author',
+                              max_nodes: int = 200) -> str:
+        """Read a bounded chapter graph context at one dataset revision. Author mode returns registered candidate planning only; reader mode withholds candidate/future plans. No external manuscript or Canon claim."""
+        return call('chapter_context', project=project, dataset_id=dataset_id,
+                    chapter_id=chapter_id, dataset_revision=dataset_revision,
+                    mode=mode, max_nodes=max_nodes)
+
+    @server.tool(annotations=ToolAnnotations(read_only_hint=True))
+    def story_consistency_review(project: str, dataset_id: str,
+                                 dataset_revision: int = 0,
+                                 scope_ids: list[str] | None = None,
+                                 checks: list[str] | None = None,
+                                 max_findings: int = 100) -> str:
+        """Check only explicit graph evidence: stale endpoints, comparable exclusive-location overlaps and state prerequisites. Missing assertions return insufficient_evidence; literary quality and Canon are never verified."""
+        return call('consistency_review', project=project, dataset_id=dataset_id,
+                    dataset_revision=dataset_revision, scope_ids=scope_ids,
+                    checks=checks, max_findings=max_findings)

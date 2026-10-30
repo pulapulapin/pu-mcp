@@ -44,23 +44,32 @@ Bounds: 100 node and 200 edge edits, 256KiB request; active graph <=2000 nodes a
 6000 edges; read pages <=50 items. Missing/oversized graphs fail rather than
 silently truncate. Candidate summaries are not full manuscripts.
 
-## Later batches and acceptance gates
+## Chapter context and conservative continuity checks
 
-Chapter context must combine fixed plan/task/source references, character states
-at event time and budget coverage. Reader mode must exclude future plans and
-author intention. The public base does not yet have private runtime Prompt or
-source-selection features; those are not assumed available or copied wholesale.
+`story_chapter_context` returns a fixed graph revision containing the selected
+chapter, descendants, explicit prerequisites and directly related characters,
+locations, states, setups and threads. Every node and edge carries a version and
+fingerprint; node evidence bindings are returned without claiming the external
+source body was loaded. Budget omissions and stale endpoints produce PARTIAL.
+READY is explicitly scoped to the registered graph. Reader mode withholds the
+candidate graph and returns BLOCKED because plans are not manuscript evidence.
 
-Consistency checks may prove explicit structural or comparable time/location
-contradictions. Missing data must yield insufficient_evidence, not invented
-conflicts. Dramatic quality remains editorial judgment. These capabilities are
-not delivered merely by exposing graph read/write tools.
+`story_consistency_review` checks stale endpoints, invalid time ranges, overlapping
+closed integer ranges at different locations explicitly marked exclusive, and
+states established after an event that requires them. Missing or incomparable
+time/state assertions return `insufficient_evidence`. Findings remain candidate
+graph evidence; dramatic quality and Canon are not verified.
+
+The schema pack gained optional story order, time domain/range, location-exclusive
+and state fields. Existing experimental datasets created with the earlier schema
+must preview/save the new schema revision before using these tools; relations are
+never silently rebound. No production project was initialized by this change.
 
 Synthetic acceptance: 48 chapters, changed event in chapter 27, explicit dependent
 chapters, exact path reporting, history, stale endpoint reporting, atomic rollback,
 idempotency, cross-project isolation, no automatic Canon. Actual Chat host tests
 and private-project import previews are separate gates after implementation.
 
-Full first-stage acceptance requires chapter context and limited continuity checks
-as well as impact preview. Do not label the whole planning milestone complete
-when only the first batch passes. No automatic manuscript generation or Agents.
+The next integration gate combines graph context with fixed task, Prompt and
+external source recovery. Actual Chat host calls and private-project import
+previews remain separate. No automatic manuscript generation or Agents.
