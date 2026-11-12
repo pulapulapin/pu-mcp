@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000" fill="#172431" role="img" aria-labelledby="title desc">
+  <title id="title">PuKnowledge exact task recovery</title>
+  <desc id="desc">Synthetic project demonstration showing a ready recovery result.</desc>
+  <defs>
+    <linearGradient id="stage" x1="0" y1="0" x2="1600" y2="1000" gradientUnits="userSpaceOnUse"><stop stop-color="#f7f4ed"/><stop offset="1" stop-color="#e9eff4"/></linearGradient>
+    <filter id="card" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="0" dy="22" stdDeviation="30" flood-color="#20364a" flood-opacity=".15"/></filter>
+    <style>
+      text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}.muted{fill:#657381}.white{fill:#f8fafb}.small{font-size:22px}.label{font-size:20px;font-weight:650;letter-spacing:.08em}.value{font-size:28px;font-weight:620}.title{font-size:60px;font-weight:650;letter-spacing:-.045em}.hair{stroke:#d7dee5;stroke-width:2}.check{fill:#2c7a62}
+    </style>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#stage)"/>
+  <text x="90" y="76" class="label" fill="#496177">PUKNOWLEDGE · SYNTHETIC WORKFLOW DEMONSTRATION</text>
+  <text x="90" y="150" class="title">Recover the exact handoff.</text>
+  <text x="90" y="194" class="small muted">A new agent session restores a selected project revision—not a guess from chat memory.</text>
+  <rect x="90" y="248" width="1420" height="650" rx="34" fill="#fff" filter="url(#card)"/>
+  <rect x="90" y="248" width="340" height="650" rx="34" fill="#162838"/>
+  <path d="M396 248h34v650h-34z" fill="#162838"/>
+  <rect x="132" y="296" width="52" height="52" rx="12" fill="#f7f4ed"/>
+  <path d="M145 334v-25h13c7 0 12 5 12 11s-5 11-12 11h-5v3zm8-10h5c3 0 5-2 5-4s-2-4-5-4h-5z" fill="#162838"/>
+  <text x="204" y="330" font-size="28" font-weight="650" class="white">PuKnowledge</text>
+  <text x="132" y="410" class="label" fill="#91a5b7">PROJECT</text>
+  <rect x="126" y="438" width="260" height="70" rx="16" fill="#28445c"/>
+  <circle cx="158" cy="473" r="9" fill="#61a6da"/>
+  <text x="181" y="481" class="small white">acceptance-alpha</text>
+  <text x="132" y="574" class="label" fill="#91a5b7">SESSION</text>
+  <text x="132" y="617" class="mono small white">host-acceptance</text>
+  <text x="132" y="728" class="label" fill="#91a5b7">WRITE ACTIVITY</text>
+  <text x="132" y="773" class="small white">None</text>
+  <rect x="132" y="817" width="170" height="38" rx="19" fill="#20384a" stroke="#4b687d"/>
+  <text x="157" y="843" font-size="18" fill="#c9d6df">LOCAL-FIRST</text>
+  <rect x="484" y="296" width="168" height="50" rx="25" fill="#e1f3ec"/>
+  <circle cx="517" cy="321" r="9" class="check"/>
+  <text x="539" y="329" font-size="22" font-weight="700" class="check">READY</text>
+  <text x="484" y="410" class="label muted">TASK ID</text>
+  <text x="484" y="454" class="mono value">HOST-ACCEPTANCE-001</text>
+  <line x1="484" y1="490" x2="1434" y2="490" class="hair"/>
+  <text x="484" y="548" class="label muted">DIRECTION REVISION</text>
+  <text x="484" y="594" class="value">1</text>
+  <text x="780" y="548" class="label muted">RECOVERY SOURCE</text>
+  <text x="780" y="594" class="value">Exact session backup</text>
+  <line x1="484" y1="632" x2="1434" y2="632" class="hair"/>
+  <text x="484" y="690" class="label muted">NEXT STEP</text>
+  <text x="484" y="746" font-size="34" font-weight="620">Open a new agent session and recover this task.</text>
+  <rect x="484" y="794" width="950" height="62" rx="14" fill="#f2f6f8"/>
+  <text x="512" y="833" class="mono small" fill="#526776">sources_loaded: session backup · revision 1 · writes_performed: none</text>
+  <text x="90" y="956" class="small muted">Synthetic fixture only · No private project data · Result proves recovery, not factual approval</text>
+</svg>

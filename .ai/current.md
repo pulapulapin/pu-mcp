@@ -110,8 +110,16 @@ Owner gates; none is implied by this decision.
 an unsent reply to the original outreach and deterministic text-only ZIP packaging
 are now maintained separately. Packaging validates the Skill, rejects unexpected
 candidate files, supports an external private-term denylist and reports the exact
-archive hash with `submitted=false` and `published=false`. Logo/screenshots, account
-creation, Creator Mode, upload, submission and email sending remain unperformed gates.
+archive hash with `submitted=false` and `published=false`. Account creation,
+Creator Mode, upload, submission and email sending remain unperformed gates.
+
+2026-11-12 Agensi visual-assets batch: a 512-square PuStudio-derived PuKnowledge
+logo and three 1600x1000 synthetic walkthrough panels now cover exact recovery,
+preview-before-save and project isolation. Editable SVG sources and PNG upload
+files live outside the buyer ZIP and are guarded by dimension/privacy tests. They
+remain Owner-review candidates; upload, submission, publication and email sending
+are still unperformed. Recommended launch order is outreach reply, minimal
+PuStudio product page and installable public release, then Agensi submission.
 
 2026-10-31 recovery parity batch: explicit manifests may be record-only but not
 empty; persisted task references accept the documented `type`/`record_id` names

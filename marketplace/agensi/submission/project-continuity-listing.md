@@ -161,13 +161,18 @@ The current public candidate has synthetic-project real-host evidence for Cursor
 TRAE and Claude Code CLI. See the compatibility notes for the exact evidence
 level and limitations.
 
-## Submission assets still required
+## Prepared submission assets
 
-- Square logo, 512 x 512 recommended. Use the public PuKnowledge identity only.
-- Up to three screenshots: recovery report, preview-before-save and project
-  isolation. Generate them from synthetic fixtures only.
-- Optional short video after the public package can be installed by an
-  independent tester.
+- `assets/puknowledge-logo.png`: 512 x 512 public logo derived from the
+  PuStudio identity.
+- `assets/01-recovery-ready.png`: exact task recovery walkthrough.
+- `assets/02-preview-before-save.png`: preview and authorization walkthrough.
+- `assets/03-project-isolation.png`: explicit cross-project rejection.
+
+All three walkthroughs are labeled synthetic demonstrations and contain no
+private project data. They require Owner visual approval before upload. An
+optional short video remains deferred until an independent tester can install
+the public package.
 
 ## Public links
 

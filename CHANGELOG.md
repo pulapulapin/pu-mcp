@@ -13,6 +13,8 @@
   external dependency rather than a metered PuKnowledge call.
 - Add complete Agensi listing copy, an unsent outreach reply and deterministic
   text-only ZIP packaging that excludes submission notes and reports its hash.
+- Add a PuStudio-derived public logo and three synthetic workflow walkthroughs
+  for recovery, preview-before-save and project-isolation listing evidence.
 
 ## 0.4.0 - 2026-11-12
 
