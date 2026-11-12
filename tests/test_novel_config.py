@@ -32,7 +32,7 @@ class PortableConfigTests(unittest.TestCase):
         self.assertEqual(novel_mcp.resolve_project('test'),project)
         self.assertEqual(w.books.root,self.root/'books')
         self.assertEqual(w.collections,{'research':self.root/'refs'})
-        self.assertEqual(w.status()['version'],'0.3.3')
+        self.assertEqual(w.status()['version'],'0.4.0')
     def test_data_environment_override(self):
         self.write({'data_dir':'old'})
         with patch.dict(os.environ, {'NOVEL_WORKBENCH_DATA':str(self.root/'override')}):

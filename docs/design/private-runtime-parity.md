@@ -1,7 +1,8 @@
 # Private runtime parity and publication boundary
 
-Date: 2026-10-30. Reference runtime: local private 0.4.11 checkout. Public base:
-0.3.3 plus `feat/story-planning`. This is a behavioral comparison, not permission
+Date: 2026-10-30. Reference runtime: local private 0.4.11 checkout. Public release
+candidate: 0.4.0 on `feat/story-planning`, developed from the public 0.3.3 base.
+This is a behavioral comparison, not permission
 to copy private Git history or project data.
 
 ## Policy
@@ -43,9 +44,9 @@ must never contain a default private project.
 | Legacy Chat bridge and tunnel management | Deployment/compatibility | Excluded from capability parity | Local operations, not public product behavior |
 | Embedded reader probe and host screenshots | Experimental/private acceptance | Excluded | Reassess as a separate UI feature |
 
-The public package version remains 0.3.3 during feature development. Private
-runtime version 0.4.11 must not be copied as a release number. Versioning is set
-only when public scope, migration notes, packaging and host acceptance are ready.
+The public package uses its own 0.4.0 release-candidate version. Private runtime
+version 0.4.11 is not copied as a release number. Public versioning follows the
+reviewed public scope, migration notes, packaging and host-acceptance evidence.
 
 ## Verification for this synchronization batch
 

@@ -31,7 +31,7 @@ class EvidenceMCPTests(unittest.TestCase):
                 async with stdio_client(params) as (read,write):
                     async with ClientSession(read,write) as session:
                         info=await session.initialize()
-                        self.assertEqual(info.server_info.version,'0.3.3')
+                        self.assertEqual(info.server_info.version,'0.4.0')
                         definitions=(await session.list_tools()).tools
                         self.assertIn('workspace_guide',{t.name for t in definitions})
                         self.assertTrue(NEW <= {t.name for t in definitions})

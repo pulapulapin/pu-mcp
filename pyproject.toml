@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pu-knowledge-workbench"
-version = "0.3.3"
+version = "0.4.0"
 description = "Traceable AI work context and evidence management for long-running research and creative projects"
 requires-python = ">=3.11"
 dependencies = ["mcp>=2,<3", "pydantic>=2,<3"]

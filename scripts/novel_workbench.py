@@ -60,7 +60,7 @@ class Workbench:
             raise ValueError('资料集合未配置；只允许预先配置的目录')
         return self.store.index(collection,self.collections[collection])
 
-    def resume(self, project='dnd', session_id=''):
+    def resume(self, project, session_id=''):
         path=self.project(project)
         from research_resume import resume_task
         inferred=novel_session.next_task(novel_session.load_project(path))
@@ -131,12 +131,12 @@ def main():
     p.add_argument('--collection',default='');p.add_argument('--edition-filter',default='all')
     p.add_argument('--path-prefix',default='');p.add_argument('--match-mode',choices=['any','all'],default='any')
     p.add_argument('--work-id',default='')
-    p=commands.add_parser('resume'); p.add_argument('--project',default='dnd')
-    p=commands.add_parser('context'); p.add_argument('--project',default='dnd');p.add_argument('--query',default='')
+    p=commands.add_parser('resume'); p.add_argument('--project',required=True)
+    p=commands.add_parser('context'); p.add_argument('--project',required=True);p.add_argument('--query',default='')
     p.add_argument('--collection',default='');p.add_argument('--edition-filter',default='all')
     p.add_argument('--path-prefix',default='');p.add_argument('--match-mode',choices=['any','all'],default='any')
     p.add_argument('--work-id',default='')
-    p=commands.add_parser('export');p.add_argument('draft_id');p.add_argument('--project',default='dnd');p.add_argument('--revision',type=int)
+    p=commands.add_parser('export');p.add_argument('draft_id');p.add_argument('--project',required=True);p.add_argument('--revision',type=int)
     commands.add_parser('backup')
     p=commands.add_parser('restore');p.add_argument('backup',type=Path);p.add_argument('new_directory',type=Path)
     args=parser.parse_args()

@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.4.0 - 2026-11-12
+
 - Add a `longform-basic` synthetic compatibility profile covering installed-tool
   discovery, non-Canon writing snapshots and drafts, exact restart recovery,
   cross-project rejection and unchanged story JSON files.

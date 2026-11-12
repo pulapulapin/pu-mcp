@@ -1,6 +1,7 @@
 # Public development status
 
-Base: origin/main 828d618 (public package 0.3.3). Branch: feat/story-planning.
+Base: origin/main 828d618 (public package 0.3.3). Branch: feat/story-planning,
+prepared as public 0.4.0 Alpha release candidate.
 This independent checkout contains only public history. No private code merge.
 
 Scope: candidate story graph in longform using existing Knowledge versions,
@@ -72,7 +73,17 @@ user configuration. `docs/EXTERNAL-USER-ACCEPTANCE.md` reduces the independent t
 to install/probe, one preview-authorized save, and a fresh-Chat recovery/isolation
 check with a fixed report template. An actual uninvolved tester is still required.
 
-Verification: 290 public-repository tests passed, including synthetic host profiles,
+2026-11-12 release-candidate preparation: public Python package, MCP server and
+plugin manifest versions are aligned at 0.4.0 and guarded by a consistency test.
+This is independent of the private runtime's 0.4.11 numbering. Merge to main,
+tagging, GitHub Release and package publication remain unperformed approval gates.
+The local wheel/sdist candidate built offline; the wheel installed into a fresh
+Python 3.14 environment and passed doctor, dependency checks and all five synthetic
+compatibility profiles. The 292-test suite passes without the prior SQLite
+ResourceWarning after closing the test-only direct connection explicitly. Local
+Python 3.11 was unavailable, so that interpreter remains a CI gate.
+
+Verification: 292 public-repository tests passed, including synthetic host profiles,
 Schema bootstrap, graph context and
 continuity tests plus real stdio calls. Existing subprocess tests use the active
 Python interpreter rather than assuming a checkout-local virtualenv. No package

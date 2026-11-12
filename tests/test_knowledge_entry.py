@@ -6,6 +6,14 @@ from mcp.client.stdio import stdio_client
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT/'scripts'))
 from novel_config import load_settings
 class KnowledgeEntryTests(unittest.TestCase):
+ def test_release_versions_are_aligned(self):
+  from novel_version import VERSION
+  project=tomllib.loads((ROOT/'pyproject.toml').read_text())
+  plugin=json.loads((ROOT/'plugins/pu-knowledge-workbench/plugin.json').read_text())
+  self.assertEqual(VERSION,'0.4.0')
+  self.assertEqual(project['project']['version'],VERSION)
+  self.assertEqual(plugin['version'],VERSION)
+
  def test_onboarding_module_is_packaged(self):
   project=tomllib.loads((ROOT/'pyproject.toml').read_text())
   self.assertIn('onboarding',project['tool']['setuptools']['py-modules'])

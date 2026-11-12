@@ -1,7 +1,8 @@
 # Lightweight story planning
 
-Status: incremental development on the public 0.3.3 base, not a migration of
-private runtime versions. Optional longform behavior reuses Knowledge storage.
+Status: 0.4.0 release candidate, incrementally developed from the public 0.3.3
+base rather than migrated from private runtime versions. Optional longform behavior
+reuses Knowledge storage.
 
 ## Responsibility boundary
 
