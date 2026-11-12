@@ -99,6 +99,13 @@ credentials and external checkout references.
 PuKnowledge remains `FREE_OPEN_SOURCE`; the candidate is `LISTING_CANDIDATE` and no
 payment, subscription, quota or entitlement system has been added.
 
+2026-11-12 distribution decision: after Agensi dependency/privacy/compatibility and
+seller-payout feasibility are established, PuKnowledge should also receive a dedicated
+`pustudio.cc` product entry, provisionally `/puknowledge/`. The existing `pustudio.cc`
+thread has been handed a read-only planning brief. Agensi submission, marketplace
+approval, website implementation, public deployment, merge and release remain separate
+Owner gates; none is implied by this decision.
+
 2026-10-31 recovery parity batch: explicit manifests may be record-only but not
 empty; persisted task references accept the documented `type`/`record_id` names
 as well as legacy `kind`/`object_id`, reject conflicting aliases and foreign
