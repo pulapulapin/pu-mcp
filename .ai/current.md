@@ -106,6 +106,13 @@ thread has been handed a read-only planning brief. Agensi submission, marketplac
 approval, website implementation, public deployment, merge and release remain separate
 Owner gates; none is implied by this decision.
 
+2026-11-12 Agensi submission-preparation batch: complete free Starter listing copy,
+an unsent reply to the original outreach and deterministic text-only ZIP packaging
+are now maintained separately. Packaging validates the Skill, rejects unexpected
+candidate files, supports an external private-term denylist and reports the exact
+archive hash with `submitted=false` and `published=false`. Logo/screenshots, account
+creation, Creator Mode, upload, submission and email sending remain unperformed gates.
+
 2026-10-31 recovery parity batch: explicit manifests may be record-only but not
 empty; persisted task references accept the documented `type`/`record_id` names
 as well as legacy `kind`/`object_id`, reject conflicting aliases and foreign

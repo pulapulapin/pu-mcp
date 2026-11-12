@@ -11,6 +11,8 @@
 - Document that PuKnowledge currently has no billing, subscription, quota or
   entitlement layer; optional PuCatch/Magpie access remains a separately licensed
   external dependency rather than a metered PuKnowledge call.
+- Add complete Agensi listing copy, an unsent outreach reply and deterministic
+  text-only ZIP packaging that excludes submission notes and reports its hash.
 
 ## 0.4.0 - 2026-11-12
 

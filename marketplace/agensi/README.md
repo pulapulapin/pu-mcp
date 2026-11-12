@@ -23,3 +23,15 @@ python3 scripts/validate_marketplace_skills.py \
 
 The product and publication contract is defined in
 [`docs/MARKETPLACE-SKILL-STANDARD.md`](../../docs/MARKETPLACE-SKILL-STANDARD.md).
+
+Build a deterministic submission candidate outside the repository:
+
+```bash
+python3 scripts/package_marketplace_skill.py \
+  --output /tmp/puknowledge-project-continuity-starter-0.1.0.zip
+```
+
+The command validates the candidate, rejects unexpected files and reports its
+SHA-256. It does not sign in, upload, submit or publish anything. Listing copy is
+kept separately in `marketplace/agensi/submission/` and is intentionally excluded
+from the buyer ZIP.
