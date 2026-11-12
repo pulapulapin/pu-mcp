@@ -47,7 +47,16 @@ Kimi Code was not run because the available account quota was exhausted. No real
 project content or production database was used; longform behavior and clean-machine
 installation remain separate gates.
 
-Verification: 285 public-repository tests passed, including synthetic host profiles,
+2026-11-12 clean-install batch completed: a fresh Python 3.14 virtual environment
+first exposed unconditional imports of unpublished `novel_game` and `domain_dnd`
+modules. Public configuration now rejects nonempty `game_repositories`, generic
+indexing uses the packaged default classifier, and a static import-closure test guards
+the package module list. Rebuilt non-editable installation passed console init,
+read-only doctor, all four synthetic compatibility profiles and dependency checks.
+The public full suite now passes 287 tests. Other operating systems and independent
+external-user installation remain unverified.
+
+Verification: 287 public-repository tests passed, including synthetic host profiles,
 Schema bootstrap, graph context and
 continuity tests plus real stdio calls. Existing subprocess tests use the active
 Python interpreter rather than assuming a checkout-local virtualenv. No package

@@ -1,4 +1,4 @@
-import asyncio,json,os,sys,tempfile,unittest,subprocess,tomllib
+import ast,asyncio,json,os,sys,tempfile,unittest,subprocess,tomllib
 from pathlib import Path
 from unittest.mock import patch
 from mcp import ClientSession,StdioServerParameters
@@ -9,6 +9,17 @@ class KnowledgeEntryTests(unittest.TestCase):
  def test_onboarding_module_is_packaged(self):
   project=tomllib.loads((ROOT/'pyproject.toml').read_text())
   self.assertIn('onboarding',project['tool']['setuptools']['py-modules'])
+
+ def test_packaged_modules_have_no_undeclared_local_imports(self):
+  project=tomllib.loads((ROOT/'pyproject.toml').read_text())
+  modules=set(project['tool']['setuptools']['py-modules']);imports=set()
+  for name in modules:
+   tree=ast.parse((ROOT/'scripts'/(name+'.py')).read_text())
+   for node in ast.walk(tree):
+    if isinstance(node,ast.Import):imports.update(alias.name.split('.')[0] for alias in node.names)
+    elif isinstance(node,ast.ImportFrom) and node.module:imports.add(node.module.split('.')[0])
+  allowed=set(sys.stdlib_module_names)|{'mcp','pydantic'}
+  self.assertEqual(imports-modules-allowed,set())
 
  def run_entry(self,*args):
   return subprocess.run([sys.executable,'-B',str(ROOT/'scripts/knowledge_entry.py'),*map(str,args)],capture_output=True,text=True)

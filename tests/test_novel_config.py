@@ -41,6 +41,10 @@ class PortableConfigTests(unittest.TestCase):
         for data in ([],{'api_key':'unexpected'}, {'books_root':''},{'collections':[]},{'collections':{'../outside':'refs'}}):
             self.write(data)
             with self.assertRaises(ValueError):load_settings()
+    def test_public_package_rejects_private_game_extension_config(self):
+        self.write({'game_repositories': {'private': {}}})
+        with self.assertRaisesRegex(ValueError, '公开版不包含game领域扩展'):
+            load_settings()
     def test_missing_explicit_file_fails(self):
         with self.assertRaises(FileNotFoundError):load_settings()
     def test_registered_project_outside_projects_dir(self):

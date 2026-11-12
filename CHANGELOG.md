@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Fix clean installed packages failing at startup because public configuration and
+  legacy indexing imported unpublished private-domain modules. Public builds now
+  reject `game_repositories`, use the generic source classifier and test the packaged
+  module import closure. A fresh Python 3.14 install passed doctor and all compat profiles.
 - Record synthetic-project real-host acceptance on Cursor, TRAE and Claude Code
   CLI 2.1.311 with a third-party model: tool discovery, preview/save, new-session
   recovery and cross-project rejection passed. Kimi Code was not run due to account

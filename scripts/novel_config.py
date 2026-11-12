@@ -121,9 +121,11 @@ def load_settings(neutral=False):
         raise ValueError('research_roots必须是许可目录列表')
     evidence_roots = [path(value) for value in roots]
     evidence_roots += [books] + [path(value) for value in supplied.values()]
-    from novel_game import validate_repositories
     from workspace_fs import collect_fs_workspaces
-    games = validate_repositories(raw.get('game_repositories', {}), path)
+    games_raw = raw.get('game_repositories', {})
+    if games_raw:
+        raise ValueError('公开版不包含game领域扩展；请移除game_repositories')
+    games = {}
     states = raw.get('project_states', {})
     if not isinstance(states, dict) or any(not isinstance(k,str) or not re.fullmatch(r'[a-z0-9_-]{1,80}',k) or v not in ('active','paused') for k,v in states.items()):
         raise ValueError('project_states必须是项目ID到active/paused的对象')

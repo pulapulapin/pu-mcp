@@ -58,8 +58,7 @@ class Workbench:
     def index(self, collection):
         if collection not in self.collections:
             raise ValueError('资料集合未配置；只允许预先配置的目录')
-        from domain_dnd import source_label
-        return self.store.index(collection,self.collections[collection],classifier=source_label)
+        return self.store.index(collection,self.collections[collection])
 
     def resume(self, project='dnd', session_id=''):
         path=self.project(project)
