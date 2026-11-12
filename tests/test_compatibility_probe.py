@@ -39,6 +39,17 @@ class CompatibilityProbeTests(unittest.TestCase):
         cached = next(item for item in report['profiles'] if item['profile'] == 'cached-tools')
         self.assertEqual(cached['state'], 'PASS')
 
+    def test_longform_profile_covers_restart_draft_and_isolation(self):
+        self.assertIn('longform-basic', PROFILES)
+        report = asyncio.run(run_profiles(['longform-basic']))
+        self.assertEqual(report['state'], 'PASS', report)
+        profile = report['profiles'][0]
+        checks = {item['id']: item for item in profile['checks']}
+        for name in ('longform_tool_discovery', 'writing_snapshot_non_canon',
+                     'draft_preview_save', 'longform_restart_recovery',
+                     'longform_project_isolation'):
+            self.assertTrue(checks[name]['passed'], checks[name])
+
     def test_cli_emits_machine_readable_protocol_only_report(self):
         env = os.environ.copy(); env['PYTHONPATH'] = str(ROOT / 'scripts')
         result = subprocess.run([sys.executable, '-B', '-m', 'compatibility_probe', '--profile', 'tools-only'],

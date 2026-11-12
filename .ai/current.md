@@ -56,7 +56,16 @@ read-only doctor, all four synthetic compatibility profiles and dependency check
 The public full suite now passes 287 tests. Other operating systems and independent
 external-user installation remain unverified.
 
-Verification: 287 public-repository tests passed, including synthetic host profiles,
+2026-11-12 synthetic longform batch completed: `puknowledge-compat` now includes a
+fifth `longform-basic` profile. It creates two temporary fiction projects, discovers
+the installed longform tools, previews and saves a versioned writing handoff and an
+independent draft, proves both remain non-Canon/unapproved/unpublished, restarts the
+MCP process for exact recovery, rejects cross-project reads and verifies that the
+fixture JSON files were unchanged. The rebuilt non-editable Python 3.14 installation
+passed this profile offline. Real manuscript quality and independent-user setup remain
+separate gates.
+
+Verification: 288 public-repository tests passed, including synthetic host profiles,
 Schema bootstrap, graph context and
 continuity tests plus real stdio calls. Existing subprocess tests use the active
 Python interpreter rather than assuming a checkout-local virtualenv. No package

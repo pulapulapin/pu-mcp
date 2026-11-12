@@ -15,9 +15,10 @@ puknowledge-compat --profile stdio-basic
 puknowledge-compat --profile tools-only
 puknowledge-compat --profile bounded-response --response-budget 12000
 puknowledge-compat --profile cached-tools
+puknowledge-compat --profile longform-basic
 ```
 
-## 四种档位
+## 五种档位
 
 | 档位 | 主要验证 |
 | --- | --- |
@@ -25,8 +26,9 @@ puknowledge-compat --profile cached-tools
 | `tools-only` | 只依赖 MCP tools，不要求宿主支持 prompts、resources 或专用 App |
 | `bounded-response` | 记录工具响应字节数，并检查任务必需响应是否落在指定预算内 |
 | `cached-tools` | 服务模块改变后工具清单发生变化，证明沿用旧工具缓存会失真，客户端应刷新发现结果 |
+| `longform-basic` | 两个合成小说项目中的长文工具发现、交接快照与独立草稿预览/保存、非 Canon 标记、进程重启恢复、跨项目拒绝及项目 JSON 不变 |
 
-前三种档位还会通过 `fs` 模块列出并按 SHA-256 指纹读取一个合成文件。所有保存都发生在系统临时目录中的合成 SQLite 数据库；命令不接受真实项目路径，也不会读取用户现有 PuKnowledge 配置。
+前三种档位还会通过 `fs` 模块列出并按 SHA-256 指纹读取一个合成文件。`longform-basic` 会创建两套最小合成小说 JSON 和临时 SQLite，保存的会话交接与草稿始终标记为非 Canon、未审批和未发布，并在重启后按固定版本恢复。所有保存都发生在系统临时目录中的合成 SQLite 数据库；命令不接受真实项目路径，也不会读取用户现有 PuKnowledge 配置。
 
 ## 报告怎么读
 
@@ -68,7 +70,7 @@ puknowledge-compat --profile cached-tools
 
 公开仓库随后在全新 Python 3.14 临时虚拟环境中执行非 editable 构建安装。首次验收发现公开配置仍无条件导入未发布的私有游戏领域模块，导致安装成功后 `--doctor` 和 MCP 启动失败；源码测试因开发环境中存在该模块而没有暴露问题。
 
-修复后重新从仓库构建安装，以下项目通过：安装后的 `pu-knowledge-workbench --doctor`、安装后的 `puknowledge-compat --profile all` 四档流程，以及全部29个已安装包的依赖一致性检查。公开配置现在明确拒绝非空 `game_repositories`，通用索引不再依赖私有 D&D 分类模块，并由静态打包依赖闭包测试防止类似遗漏回归。
+修复后重新从仓库构建安装，以下项目通过：安装后的 `pu-knowledge-workbench --doctor`、安装后的 `puknowledge-compat --profile all` 五档流程，以及全部29个已安装包的依赖一致性检查。第五档在安装包中验证合成长文交接、独立草稿、重启恢复和项目隔离。公开配置现在明确拒绝非空 `game_repositories`，通用索引不再依赖私有 D&D 分类模块，并由静态打包依赖闭包测试防止类似遗漏回归。
 
 该验收仍是在维护者同一台 macOS 机器的临时环境完成，不等同于 Windows/Linux、其他 Python 版本或外部新用户安装通过。
 

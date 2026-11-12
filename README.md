@@ -70,7 +70,7 @@ python3 -m venv .venv
 
 初始化只登记一个已经存在的目录并创建权限为当前用户可读写的配置文件；不会创建数据库、扫描项目内容或修改项目。`--doctor` 只读检查配置、路径、权限和已有 SQLite 的完整性，返回 `READY` 或 `BLOCKED`，但不能代替 MCP 宿主中的真实调用验收。
 
-公开包已在全新 Python 3.14 临时环境中完成非 editable 安装验收：安装后的控制台命令、初始化、`--doctor`、依赖一致性和四档合成兼容探针均通过。该结果不替代其他操作系统或独立用户安装测试。
+公开包已在全新 Python 3.14 临时环境中完成非 editable 安装验收：安装后的控制台命令、初始化、`--doctor`、依赖一致性和五档合成兼容探针均通过。该结果不替代其他操作系统或独立用户安装测试。
 
 如果暂时无法运行 Claude Code、Cursor 等目标宿主，可以先执行公开的合成兼容探针：
 
@@ -78,7 +78,7 @@ python3 -m venv .venv
 .venv/bin/puknowledge-compat --profile all
 ```
 
-探针会在临时目录中启动真实 MCP 服务，使用合成项目检查握手、工具发现、预览/保存、进程重启恢复、只读文件、项目隔离、响应预算和工具缓存变化。报告始终包含 `simulated=true` 与 `real_host_verified=false`；通过只代表协议工作流成立，不能替代真实宿主验收。范围、四种模拟档位和判定方式见[宿主兼容验证](docs/HOST-COMPATIBILITY.md)。
+探针会在临时目录中启动真实 MCP 服务，使用合成项目检查握手、工具发现、预览/保存、进程重启恢复、只读文件、项目隔离、响应预算、工具缓存变化，以及长文交接与独立草稿的非 Canon 闭环。报告始终包含 `simulated=true` 与 `real_host_verified=false`；通过只代表协议工作流成立，不能替代真实宿主验收。范围、五种模拟档位和判定方式见[宿主兼容验证](docs/HOST-COMPATIBILITY.md)。
 
 如需手工配置，可复制 `config/workspace.example.json`。本机配置不应提交；相对路径以配置文件所在目录为基准。
 

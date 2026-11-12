@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import hashlib
 import json
 import os
 import sys
@@ -14,11 +15,16 @@ from mcp.client.stdio import stdio_client
 from novel_version import VERSION
 
 
-PROFILES = ('stdio-basic', 'tools-only', 'bounded-response', 'cached-tools')
+PROFILES = ('stdio-basic', 'tools-only', 'bounded-response', 'cached-tools', 'longform-basic')
 ENTRY = Path(__file__).resolve().with_name('knowledge_entry.py')
 REQUIRED = {
     'workspace_guide', 'workspace_list_projects', 'task_resume',
     'task_preview_snapshot', 'task_save_snapshot', 'task_read_snapshot',
+}
+LONGFORM_REQUIRED = {
+    'workspace_guide', 'workspace_list_projects', 'writing_resume',
+    'writing_preview_snapshot', 'writing_save_snapshot', 'writing_list_snapshots',
+    'writing_read_snapshot', 'draft_propose', 'draft_preview', 'draft_save', 'draft_get',
 }
 
 
@@ -65,15 +71,40 @@ async def _call(session: ClientSession, name: str, args: dict, sizes: dict) -> d
         raise RuntimeError(name + '未返回有效JSON') from exc
     if response.is_error or not payload.get('ok'):
         raise RuntimeError(name + '失败: ' + str(payload.get('error') or 'unknown'))
-    return payload['result']
+    return payload.get('result', payload)
 
 
-def _write_fixture(root: Path, modules=('core', 'fs')) -> Path:
+def _write_story(path: Path, project_id: str) -> None:
+    path.mkdir(parents=True)
+    values = {
+        'story-contract': {
+            'id': project_id, 'mode': 'novel', 'title': 'Synthetic Longform',
+            'genre': 'test', 'logline': 'A synthetic fixture proves traceable recovery.',
+            'core_conflict': 'The test must preserve boundaries.', 'theme': 'traceability',
+            'narrative_pov': 'third-person limited', 'ending_direction': 'verified recovery',
+            'invariants': ['Synthetic candidates never become Canon automatically.'],
+        },
+        'world': {'rules': [{'id': 'synthetic-rule', 'rule': 'Test data only', 'status': 'confirmed'}]},
+        'characters': {'characters': []}, 'timeline': {'events': []}, 'chapters': {'chapters': []},
+    }
+    for name, value in values.items():
+        (path / (name + '.json')).write_text(json.dumps(value, ensure_ascii=False), encoding='utf-8')
+
+
+def _story_hashes(projects: Path) -> dict[str, str]:
+    return {str(path.relative_to(projects)): hashlib.sha256(path.read_bytes()).hexdigest()
+            for path in sorted(projects.rglob('*.json'))}
+
+
+def _write_fixture(root: Path, modules=('core', 'fs'), *, longform: bool = False) -> Path:
     alpha = root / 'alpha'; beta = root / 'beta'
     projects = root / 'longform-projects'
     alpha.mkdir(); beta.mkdir(); projects.mkdir()
     (alpha / 'note.md').write_text('# Synthetic\nTraceable project note.\n', encoding='utf-8')
     (beta / 'note.md').write_text('# Synthetic\nIsolated second project.\n', encoding='utf-8')
+    if longform:
+        _write_story(projects / 'story-alpha', 'story-alpha')
+        _write_story(projects / 'story-beta', 'story-beta')
     fs = {'enabled': True, 'readonly': True}
     config = root / 'config.json'
     config.write_text(json.dumps({
@@ -87,6 +118,134 @@ def _write_fixture(root: Path, modules=('core', 'fs')) -> Path:
         'modules': list(modules), 'capture': {'enabled': False},
     }, ensure_ascii=False), encoding='utf-8')
     return config
+
+
+async def _longform_workflow(config: Path) -> dict:
+    checks = []; sizes = {}
+    projects_dir = Path(json.loads(config.read_text(encoding='utf-8'))['projects_dir'])
+    before_hashes = _story_hashes(projects_dir)
+    snapshot_fingerprint = ''
+    draft_id = 'synthetic-chapter'
+    try:
+        async with stdio_client(_parameters(config)) as (reader, writer):
+            async with ClientSession(reader, writer) as session:
+                info = await session.initialize()
+                _check(checks, 'initialize', info.server_info.name == 'pu-knowledge-workbench' and
+                       info.server_info.version == VERSION,
+                       'server=' + info.server_info.name + ' version=' + info.server_info.version)
+                definitions = (await session.list_tools()).tools
+                names = {item.name for item in definitions}
+                missing = sorted(LONGFORM_REQUIRED - names)
+                _check(checks, 'longform_tool_discovery', not missing,
+                       'required longform tools present' if not missing else 'missing=' + ','.join(missing))
+                guide = await _call(session, 'workspace_guide', {}, sizes)
+                _check(checks, 'longform_guide_modules', guide['modules'] == ['core', 'fs', 'longform'],
+                       'loaded=' + ','.join(guide['modules']))
+                catalog = await _call(session, 'workspace_list_projects', {}, sizes)
+                projects = {item['id']: item for item in catalog['projects']}
+                valid_projects = (projects.get('story-alpha', {}).get('workspace_interface') == 'writing' and
+                                  projects.get('story-beta', {}).get('workspace_interface') == 'writing')
+                _check(checks, 'longform_project_discovery', valid_projects,
+                       'two synthetic writing projects discovered')
+                initial = await _call(session, 'writing_resume', {'project': 'story-alpha'}, sizes)
+                _check(checks, 'longform_initial_state', initial['resume_mode'] == 'json_task_inference' and
+                       initial['session_backup'] is None,
+                       'initial project has inferred task and no saved session')
+                snapshot = {
+                    'task': 'Develop a synthetic opening scene.',
+                    'summary': 'Synthetic longform acceptance; no real project content.',
+                    'next_step': 'Restart the MCP process and recover this exact direction.',
+                    'candidates': ['Unapproved synthetic scene branch.'],
+                    'unresolved': ['Owner has not selected a scene.'],
+                    'task_context': {'task_id': 'longform-compatibility', 'stage': 'scene-outline',
+                                     'state': 'active', 'direction_revision': 1},
+                }
+                snapshot_args = {'project': 'story-alpha', 'session_id': 'longform-probe',
+                                 'snapshot': snapshot}
+                preview = await _call(session, 'writing_preview_snapshot', snapshot_args, sizes)
+                saved = await _call(session, 'writing_save_snapshot', {
+                    **snapshot_args, 'baseline': preview['baseline'],
+                    'preview_fingerprint': preview['preview_fingerprint'],
+                    'operation_key': 'longform-snapshot-save',
+                }, sizes)
+                snapshot_fingerprint = saved['fingerprint']
+                non_canon = (preview['saved'] is False and preview['canon'] is False and
+                             saved['revision'] == 1 and saved['canon'] is False and
+                             saved['approval_verified'] is False)
+                _check(checks, 'writing_snapshot_non_canon', non_canon,
+                       'preview/save revision=1 remains non-Canon and unapproved')
+                listed = await _call(session, 'writing_list_snapshots',
+                                     {'project': 'story-alpha', 'session_id': 'longform-probe'}, sizes)
+                read = await _call(session, 'writing_read_snapshot', {
+                    'project': 'story-alpha', 'session_id': 'longform-probe', 'revision': 1,
+                    'expected_fingerprint': snapshot_fingerprint, 'max_chars': 6000,
+                }, sizes)
+                snapshot_roundtrip = (listed['total'] == 1 and
+                                      json.loads(read['text'])['task_context']['task_id'] ==
+                                      'longform-compatibility')
+                _check(checks, 'writing_snapshot_roundtrip', snapshot_roundtrip,
+                       'fixed revision and fingerprint round-trip succeeded')
+                proposal = await _call(session, 'draft_propose', {
+                    'project': 'story-alpha', 'draft_id': draft_id,
+                    'title': 'Synthetic chapter candidate',
+                    'body': 'A synthetic paragraph used only for installed-package verification.',
+                    'baseline': 0,
+                }, sizes)
+                reviewed = await _call(session, 'draft_preview', {'proposal_id': proposal['id']}, sizes)
+                draft_saved = await _call(session, 'draft_save', {
+                    'proposal_id': proposal['id'], 'operation_key': 'longform-draft-save',
+                }, sizes)
+                draft = await _call(session, 'draft_get', {
+                    'project': 'story-alpha', 'draft_id': draft_id, 'revision': 1,
+                }, sizes)
+                draft_ok = (reviewed['state'] == 'pending' and draft_saved['revision'] == 1 and
+                            draft_saved['canon'] is False and draft_saved['published'] is False and
+                            draft['body'].startswith('A synthetic paragraph') and
+                            draft['canon'] is False and draft['published'] is False)
+                _check(checks, 'draft_preview_save', draft_ok,
+                       'independent draft revision=1 remains non-Canon and unpublished')
+                isolated_snapshot = await session.call_tool('writing_read_snapshot', {
+                    'project': 'story-beta', 'session_id': 'longform-probe', 'revision': 1,
+                    'expected_fingerprint': snapshot_fingerprint,
+                })
+                isolated_draft = await session.call_tool('draft_get', {
+                    'project': 'story-beta', 'draft_id': draft_id, 'revision': 1,
+                })
+                denied = []
+                for response in (isolated_snapshot, isolated_draft):
+                    raw = response.content[0].text if response.content else '{}'
+                    try:
+                        denied.append(response.is_error or not json.loads(raw).get('ok', False))
+                    except json.JSONDecodeError:
+                        denied.append(True)
+                _check(checks, 'longform_project_isolation', all(denied),
+                       'second writing project cannot read snapshot or draft')
+        async with stdio_client(_parameters(config)) as (reader, writer):
+            async with ClientSession(reader, writer) as session:
+                await session.initialize()
+                recovered = await _call(session, 'writing_resume', {
+                    'project': 'story-alpha', 'session_id': 'longform-probe',
+                }, sizes)
+                recovered_draft = await _call(session, 'draft_get', {
+                    'project': 'story-alpha', 'draft_id': draft_id, 'revision': 1,
+                }, sizes)
+                recovery_ok = (recovered['resume_mode'] == 'session_backup' and
+                               recovered['task_id'] == 'longform-compatibility' and
+                               recovered['direction_revision'] == 1 and
+                               recovered_draft['revision'] == 1)
+                _check(checks, 'longform_restart_recovery', recovery_ok,
+                       'exact writing direction and draft recovered after process restart')
+                untouched = await _call(session, 'writing_resume', {'project': 'story-beta'}, sizes)
+                _check(checks, 'longform_restart_isolation',
+                       untouched['session_backup'] is None and untouched['task_id'] is None,
+                       'second writing project remains without saved session')
+        _check(checks, 'project_files_unchanged', before_hashes == _story_hashes(projects_dir),
+               'story JSON files were not modified by snapshot or draft storage')
+    except Exception as exc:
+        _check(checks, 'unexpected_error', False, _exception_text(exc))
+    passed = not any(item['status'] == 'failed' for item in checks)
+    return {'profile': 'longform-basic', 'state': 'PASS' if passed else 'FAIL', 'checks': checks,
+            'max_response_bytes': max(sizes.values(), default=0), 'response_sizes': sizes}
 
 
 async def _workflow(config: Path, profile: str, response_budget: int) -> dict:
@@ -207,6 +366,9 @@ async def run_profiles(profiles: list[str], response_budget: int = 12000) -> dic
             if profile == 'cached-tools':
                 config = _write_fixture(root, modules=('core',))
                 results.append(await _cached_tools(config))
+            elif profile == 'longform-basic':
+                config = _write_fixture(root, modules=('core', 'fs', 'longform'), longform=True)
+                results.append(await _longform_workflow(config))
             else:
                 config = _write_fixture(root)
                 results.append(await _workflow(config, profile, response_budget))
