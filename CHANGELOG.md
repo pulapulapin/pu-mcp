@@ -5,6 +5,8 @@
 - Add a `longform-basic` synthetic compatibility profile covering installed-tool
   discovery, non-Canon writing snapshots and drafts, exact restart recovery,
   cross-project rejection and unchanged story JSON files.
+- Add overwrite-safe `puknowledge-compat --prepare-host` fixtures and a concise
+  independent-user install, real-host recovery and isolation acceptance script.
 - Fix clean installed packages failing at startup because public configuration and
   legacy indexing imported unpublished private-domain modules. Public builds now
   reject `game_repositories`, use the generic source classifier and test the packaged

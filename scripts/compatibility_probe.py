@@ -120,6 +120,27 @@ def _write_fixture(root: Path, modules=('core', 'fs'), *, longform: bool = False
     return config
 
 
+def prepare_host_fixture(output: Path) -> dict:
+    """Create a persistent synthetic fixture for real-host acceptance; never overwrite."""
+    root = output.expanduser().resolve()
+    if root.exists():
+        raise ValueError('验收目录已存在；为避免覆盖，请指定一个新的空路径')
+    root.mkdir(parents=True)
+    config = _write_fixture(root, modules=('core', 'fs', 'longform'), longform=True)
+    return {
+        'state': 'READY', 'synthetic': True, 'database_created': False,
+        'root': str(root), 'config': str(config),
+        'projects': ['alpha', 'beta', 'story-alpha', 'story-beta'],
+        'mcp': {
+            'command': sys.executable,
+            'args': ['-B', str(ENTRY), '--config', str(config)],
+            'transport': 'stdio',
+        },
+        'next_step': '将mcp.command和mcp.args登记到待验收宿主，然后按外部用户验收文档操作。',
+        'notice': '仅合成项目；首次宿主写入时才创建本次验收数据库，不读取现有PuKnowledge配置。',
+    }
+
+
 async def _longform_workflow(config: Path) -> dict:
     checks = []; sizes = {}
     projects_dir = Path(json.loads(config.read_text(encoding='utf-8'))['projects_dir'])
@@ -387,7 +408,19 @@ def main() -> int:
     parser = argparse.ArgumentParser(description='PuKnowledge synthetic MCP host compatibility probe')
     parser.add_argument('--profile', choices=('all',) + PROFILES, default='all')
     parser.add_argument('--response-budget', type=int, default=12000)
+    parser.add_argument('--prepare-host', type=Path,
+                        help='create a persistent synthetic fixture for real-host acceptance')
     args = parser.parse_args()
+    if args.prepare_host:
+        if args.profile != 'all' or args.response_budget != 12000:
+            parser.error('--prepare-host cannot be combined with --profile/--response-budget')
+        try:
+            report = prepare_host_fixture(args.prepare_host)
+        except (ValueError, OSError) as exc:
+            print(json.dumps({'state': 'BLOCKED', 'error': str(exc)}, ensure_ascii=False, indent=2))
+            return 2
+        print(json.dumps(report, ensure_ascii=False, indent=2))
+        return 0
     if not 2000 <= args.response_budget <= 1_000_000:
         parser.error('--response-budget must be between 2000 and 1000000 bytes')
     selected = list(PROFILES) if args.profile == 'all' else [args.profile]

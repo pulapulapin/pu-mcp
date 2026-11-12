@@ -49,6 +49,14 @@ puknowledge-compat --profile longform-basic
 - 宿主所用模型会在正确时机选择正确工具；
 - 某个真实项目的恢复内容、创作质量或业务结果已经通过。
 
+如需让真实宿主连接同一套持久合成夹具，可以执行：
+
+```bash
+puknowledge-compat --prepare-host ~/Documents/puknowledge-host-acceptance
+```
+
+输出包含绝对 `mcp.command` 和 `mcp.args`。目标目录必须不存在；命令不会覆盖目录、创建数据库或读取现有用户配置。后续真实宿主步骤见[外部用户首装验收](EXTERNAL-USER-ACCEPTANCE.md)。
+
 真实宿主可用后，仍应在不含私人内容的验收项目中重复：工具发现、明确选项目、恢复任务、读取准确来源、预览并保存、重开会话恢复、交叉项目拒绝。只有这些行为实际发生，才能把该宿主标记为已验收。
 
 ## 2026-11-12 真实宿主验收

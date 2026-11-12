@@ -65,7 +65,14 @@ fixture JSON files were unchanged. The rebuilt non-editable Python 3.14 installa
 passed this profile offline. Real manuscript quality and independent-user setup remain
 separate gates.
 
-Verification: 288 public-repository tests passed, including synthetic host profiles,
+2026-11-12 external-user gate prepared but not claimed as passed: the compatibility
+CLI can now create a persistent, overwrite-safe four-project synthetic fixture and
+print exact stdio launch parameters without creating a database or reading existing
+user configuration. `docs/EXTERNAL-USER-ACCEPTANCE.md` reduces the independent test
+to install/probe, one preview-authorized save, and a fresh-Chat recovery/isolation
+check with a fixed report template. An actual uninvolved tester is still required.
+
+Verification: 290 public-repository tests passed, including synthetic host profiles,
 Schema bootstrap, graph context and
 continuity tests plus real stdio calls. Existing subprocess tests use the active
 Python interpreter rather than assuming a checkout-local virtualenv. No package

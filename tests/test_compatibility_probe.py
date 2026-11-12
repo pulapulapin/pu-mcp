@@ -10,7 +10,7 @@ from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'scripts'))
-from compatibility_probe import PROFILES, _environment, run_profiles
+from compatibility_probe import PROFILES, _environment, prepare_host_fixture, run_profiles
 
 
 class CompatibilityProbeTests(unittest.TestCase):
@@ -65,6 +65,36 @@ class CompatibilityProbeTests(unittest.TestCase):
         checks = report['profiles'][0]['checks']
         budget = next(item for item in checks if item['id'] == 'response_budget')
         self.assertFalse(budget['passed'])
+
+    def test_prepare_host_fixture_is_explicit_synthetic_and_refuses_overwrite(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as temp:
+            output = Path(temp) / 'host-acceptance'
+            report = prepare_host_fixture(output)
+            self.assertEqual(report['state'], 'READY')
+            self.assertTrue(report['synthetic'])
+            self.assertFalse(report['database_created'])
+            config = json.loads(Path(report['config']).read_text(encoding='utf-8'))
+            self.assertEqual(config['modules'], ['core', 'fs', 'longform'])
+            self.assertEqual(sorted(config['workspaces']), ['alpha', 'beta'])
+            self.assertEqual(sorted(path.name for path in (output / 'longform-projects').iterdir()),
+                             ['story-alpha', 'story-beta'])
+            self.assertFalse((output / 'data').exists())
+            with self.assertRaises(ValueError):
+                prepare_host_fixture(output)
+
+    def test_cli_prepares_machine_readable_host_fixture(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as temp:
+            output = Path(temp) / 'external-host'
+            env = os.environ.copy(); env['PYTHONPATH'] = str(ROOT / 'scripts')
+            result = subprocess.run([sys.executable, '-B', '-m', 'compatibility_probe',
+                                     '--prepare-host', str(output)], cwd=ROOT, env=env,
+                                    capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            report = json.loads(result.stdout)
+            self.assertEqual(report['state'], 'READY')
+            self.assertEqual(report['mcp']['transport'], 'stdio')
 
 
 if __name__ == '__main__':

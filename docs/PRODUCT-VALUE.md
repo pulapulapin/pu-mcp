@@ -151,6 +151,8 @@ RAG 主要解决“找到相似内容”。PuKnowledge 更关注“当前任务�
 
 仓库内的 `puknowledge-compat` 可以在目标宿主暂不可用时先排除服务端协议、工具缓存、响应预算和隔离方面的基础问题。它不是宿主模拟 UI，也不模拟模型会不会正确选择工具；报告中的 `real_host_verified=false` 是固定边界。详见[宿主兼容验证](HOST-COMPATIBILITY.md)。
 
+外部测试者可以用 `puknowledge-compat --prepare-host <新目录>` 生成不含私人内容的持久验收夹具，再按[外部用户首装验收](EXTERNAL-USER-ACCEPTANCE.md)完成真实宿主测试。维护者本机重复执行该流程不能替代独立用户样本。
+
 ## 明确边界
 
 - 默认面向单用户、受信任的本地工作区，不是现成的多租户服务。

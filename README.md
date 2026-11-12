@@ -80,6 +80,8 @@ python3 -m venv .venv
 
 探针会在临时目录中启动真实 MCP 服务，使用合成项目检查握手、工具发现、预览/保存、进程重启恢复、只读文件、项目隔离、响应预算、工具缓存变化，以及长文交接与独立草稿的非 Canon 闭环。报告始终包含 `simulated=true` 与 `real_host_verified=false`；通过只代表协议工作流成立，不能替代真实宿主验收。范围、五种模拟档位和判定方式见[宿主兼容验证](docs/HOST-COMPATIBILITY.md)。
 
+邀请未参与开发的人复验时，不需要手写隐藏配置：`puknowledge-compat --prepare-host <新目录>` 会生成四个持久合成项目和可直接登记到宿主的 stdio 参数。完整三轮指令、PASS/PARTIAL 边界和回报模板见[外部用户首装验收](docs/EXTERNAL-USER-ACCEPTANCE.md)。
+
 如需手工配置，可复制 `config/workspace.example.json`。本机配置不应提交；相对路径以配置文件所在目录为基准。
 
 当前初始化命令创建的是通用 `task` 工作区，适合研究、产品和普通长期项目；它不会猜测小说结构或自动启用 `longform`。长篇项目仍应按已有项目格式和明确配置接入。
