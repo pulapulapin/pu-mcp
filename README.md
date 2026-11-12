@@ -27,6 +27,13 @@ PuKnowledge 在模型之外保存项目状态，让 Agent 每次先核对再继�
 
 更多具体案例、适用环境和价值验证标准见[产品价值与使用场景](docs/PRODUCT-VALUE.md)。
 
+面向 Agent Skill 市场的交付不等于托管或销售 MCP 本体。PuKnowledge 继续由
+用户独立安装和运行；市场候选只负责指导 Agent 何时、按什么权限和顺序调用它。
+公开候选、权限契约和发布门槛见
+[Marketplace Skill 标准](docs/MARKETPLACE-SKILL-STANDARD.md)，免费运行时、
+付费 Skill、外部授权能力和托管服务的区别见
+[商业能力边界](docs/COMMERCIAL-CAPABILITIES.md)。
+
 ## 可以在哪里使用
 
 PuKnowledge 是 MCP 服务，不绑定某一个聊天产品。本地 `stdio` 入口可供支持 MCP 的桌面 Agent 或 IDE 启动；HTTP 入口可用于受保护的远程部署或自建应用。不同宿主的工具发现、授权和 UI 行为可能不同，因此“协议兼容”不等于已经完成宿主验收。
@@ -132,6 +139,12 @@ python3 -m venv .venv
 当前候选版本为 `0.4.0` Alpha。程序代码采用 [Apache License 2.0](LICENSE)；该许可不自动覆盖用户数据库、小说正文、研究资料、项目文件或媒体内容。可选 Magpie/PuCatch 以各自仓库的许可为准。安全边界面向单用户、受信任的本地工作区，不是多租户权限系统。独立外部用户首装仍待发布后收集，不应把本机及维护者宿主验收解释成市场验证。
 
 安全问题请按 [SECURITY.md](SECURITY.md) 私下报告；参与开发见 [CONTRIBUTING.md](CONTRIBUTING.md)。
+
+仓库包含一个尚未提交平台审核的
+[`Project Continuity Starter`](marketplace/agensi/project-continuity/SKILL.md)
+候选。它的状态是 `LISTING_CANDIDATE`，不是已上线或已收费商品。发布前可运行
+`python3 scripts/validate_marketplace_skills.py` 检查元数据、必要契约和明显的私有
+内容泄漏。
 
 ### Candidate story planning (development)
 

@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- Define a public marketplace Skill contract covering MCP/Skill/project
+  responsibilities, explicit dependencies, preview-authorized writes,
+  READY/PARTIAL/BLOCKED outputs, compatibility evidence and commercial status.
+- Add an unpublished Agensi `Project Continuity Starter` candidate plus an
+  offline validator and regression tests that reject private paths, reserved
+  project markers and terms supplied through an uncommitted local denylist.
+- Document that PuKnowledge currently has no billing, subscription, quota or
+  entitlement layer; optional PuCatch/Magpie access remains a separately licensed
+  external dependency rather than a metered PuKnowledge call.
+
 ## 0.4.0 - 2026-11-12
 
 - Add a `longform-basic` synthetic compatibility profile covering installed-tool

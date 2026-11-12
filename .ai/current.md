@@ -89,6 +89,16 @@ continuity tests plus real stdio calls. Existing subprocess tests use the active
 Python interpreter rather than assuming a checkout-local virtualenv. No package
 release, production project import or real-project host test was performed.
 
+2026-11-12 marketplace-readiness batch in progress: the repository now defines a
+public Skill/MCP/project responsibility contract, privacy and preview-write rules,
+commercial status vocabulary and publication gates. An unpublished Agensi Project
+Continuity Starter candidate uses generic tools and data only. An offline validator
+checks candidate metadata, required contracts, private absolute paths, selected
+reserved private markers, terms from an uncommitted local denylist, embedded
+credentials and external checkout references.
+PuKnowledge remains `FREE_OPEN_SOURCE`; the candidate is `LISTING_CANDIDATE` and no
+payment, subscription, quota or entitlement system has been added.
+
 2026-10-31 recovery parity batch: explicit manifests may be record-only but not
 empty; persisted task references accept the documented `type`/`record_id` names
 as well as legacy `kind`/`object_id`, reject conflicting aliases and foreign
