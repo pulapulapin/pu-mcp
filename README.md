@@ -69,6 +69,14 @@ python3 -m venv .venv
 
 初始化只登记一个已经存在的目录并创建权限为当前用户可读写的配置文件；不会创建数据库、扫描项目内容或修改项目。`--doctor` 只读检查配置、路径、权限和已有 SQLite 的完整性，返回 `READY` 或 `BLOCKED`，但不能代替 MCP 宿主中的真实调用验收。
 
+如果暂时无法运行 Claude Code、Cursor 等目标宿主，可以先执行公开的合成兼容探针：
+
+```bash
+.venv/bin/puknowledge-compat --profile all
+```
+
+探针会在临时目录中启动真实 MCP 服务，使用合成项目检查握手、工具发现、预览/保存、进程重启恢复、只读文件、项目隔离、响应预算和工具缓存变化。报告始终包含 `simulated=true` 与 `real_host_verified=false`；通过只代表协议工作流成立，不能替代真实宿主验收。范围、四种模拟档位和判定方式见[宿主兼容验证](docs/HOST-COMPATIBILITY.md)。
+
 如需手工配置，可复制 `config/workspace.example.json`。本机配置不应提交；相对路径以配置文件所在目录为基准。
 
 当前初始化命令创建的是通用 `task` 工作区，适合研究、产品和普通长期项目；它不会猜测小说结构或自动启用 `longform`。长篇项目仍应按已有项目格式和明确配置接入。

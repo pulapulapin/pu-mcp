@@ -30,7 +30,17 @@ SQLite integrity, returning READY/BLOCKED without initializing storage. The
 initializer explicitly creates a generic `task` workspace and does not infer a
 longform project. Public full suite: 279 passed.
 
-Verification: 266 public-repository tests passed, including Schema bootstrap, graph context and
+2026-11-12 synthetic host compatibility batch completed: `puknowledge-compat`
+starts this checkout's own stdio entry against temporary synthetic projects and
+profiles basic stdio, tools-only clients, bounded responses and stale tool caches.
+It checks preview/save/restart recovery, bounded fs reads and project isolation;
+reports are fixed to `simulated=true` and `real_host_verified=false`. The work
+also corrected the public `fs_read_file` implementation to match its existing
+optional `review_items` tool signature. No private project or real-host claim is
+part of this batch.
+
+Verification: 285 public-repository tests passed, including synthetic host profiles,
+Schema bootstrap, graph context and
 continuity tests plus real stdio calls. Existing subprocess tests use the active
 Python interpreter rather than assuming a checkout-local virtualenv. No package
 release, real Chat host test or production project import was performed.

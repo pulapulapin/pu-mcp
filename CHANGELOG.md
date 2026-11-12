@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Add `puknowledge-compat`, a synthetic stdio host probe covering initialization,
+  tool/schema discovery, preview/save, restart recovery, bounded file reads,
+  project isolation, response budgets and stale tool caches. Reports always mark
+  simulated evidence separately from real-host verification.
+- Fix `fs_read_file` to honor its published optional `review_items` argument and
+  return quote anchors against the full fingerprint-verified file.
 - Add explicit `--init-workspace` onboarding and read-only `--doctor` checks.
   Initialization refuses overwrite, records one existing generic task workspace and
   leaves project content/storage untouched; doctor reports READY/BLOCKED for config,

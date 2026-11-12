@@ -164,7 +164,7 @@ class FsWorkspace:
           'depth':depth,'total':len(files),'files':page,
           'next_offset':offset+limit if offset+limit<len(files) else None,'policy':POLICY}
 
- def read_file(self,path:str,expected_fingerprint:str,char_offset:int=0,max_chars:int=3000):
+ def read_file(self,path:str,expected_fingerprint:str,char_offset:int=0,max_chars:int=3000,review_items=None):
   if char_offset<0 or not 1<=max_chars<=6000:raise ValueError('读取范围无效；最多6000字符')
   if not expected_fingerprint or not re.fullmatch(r'[0-9a-f]{64}',expected_fingerprint):
    raise ValueError('须提供当前文件SHA256指纹')
@@ -176,9 +176,18 @@ class FsWorkspace:
   if meta['fingerprint']!=expected_fingerprint:raise ValueError('文件已变化；请重新获取指纹')
   excerpt=text[char_offset:end]
   start=text.count('\n',0,char_offset)+1
-  return {**meta,'project':self.project,'char_start':char_offset,'char_end':end,
+  result={**meta,'project':self.project,'char_start':char_offset,'char_end':end,
           'line_start':start,'line_end':text.count('\n',0,max(char_offset,end-1))+1,
           'text':excerpt,'next_char_offset':end if end<len(text) else None,'policy':POLICY}
+  if review_items is not None:
+   from manuscript_review import anchors
+   checked=anchors(text,review_items)
+   result['review_check']={'source':{'project':self.project,'path':path,
+     'fingerprint':expected_fingerprint,'fingerprint_scheme':'sha256_raw_bytes'},
+     'items':checked,'all_anchored':bool(checked) and all(x['status']=='anchored' for x in checked),
+     'semantic_verified':False,'owner_adopted':False,'saved':False,
+     'scope':'仅核对整份已验SHA的UTF-8文本；位置相对解码去BOM后的全文，不是当前分页。不认证文学判断。'}
+  return result
 
  def search(self,query:str,mode:str='and',limit:int=20,path_prefix:str=''):
   if mode not in ('and','or','phrase'):raise ValueError('mode须为and/or/phrase')
