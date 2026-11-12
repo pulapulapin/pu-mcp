@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Record synthetic-project real-host acceptance on Cursor, TRAE and Claude Code
+  CLI 2.1.311 with a third-party model: tool discovery, preview/save, new-session
+  recovery and cross-project rejection passed. Kimi Code was not run due to account
+  quota and is not reported as a failure.
 - Add `puknowledge-compat`, a synthetic stdio host probe covering initialization,
   tool/schema discovery, preview/save, restart recovery, bounded file reads,
   project isolation, response budgets and stale tool caches. Reports always mark

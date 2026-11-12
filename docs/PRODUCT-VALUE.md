@@ -107,8 +107,10 @@ PuKnowledge 的核心数据位于 MCP 服务及用户指定的项目存储中，
 | --- | --- | --- |
 | 本地 ChatGPT/Codex 插件 | 本地插件启动 `stdio` | 开发运行版已有真实项目证据；公开发行包待复验 |
 | Codex CLI/IDE | 本地 MCP 配置 | 协议可接入，待公开版黑盒验收 |
-| Claude Code | 本地 MCP 命令 | 合成协议探针可覆盖基础流程；真实宿主待验收 |
-| Cursor | `stdio` 或受保护的 HTTP | 合成协议探针可覆盖基础流程；真实宿主待验收 |
+| Claude Code CLI 2.1.311 | 本地 MCP 命令 | 合成项目真实宿主闭环通过；使用第三方模型，不代表 Anthropic 模型验收 |
+| Cursor | `stdio` 或受保护的 HTTP | 合成项目真实宿主闭环通过 |
+| TRAE | 本地 `stdio` MCP | 合成项目真实宿主闭环通过 |
+| Kimi Code | 本地 `stdio` MCP | 因现有额度不足未执行，不计为失败 |
 | VS Code Agent 模式 | 本地命令或远程 URL | 协议可接入，待黑盒验收 |
 | 自建小说/研究工作台 | MCP/API 加独立 UI | 需要前端产品开发 |
 | 定时或 CI 检查 | 命令行或程序化客户端 | 适合只读检查，尚无正式自动化产品 |

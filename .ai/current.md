@@ -39,11 +39,19 @@ also corrected the public `fs_read_file` implementation to match its existing
 optional `review_items` tool signature. No private project or real-host claim is
 part of this batch.
 
+2026-11-12 manual real-host acceptance completed against separate ignored
+synthetic databases: Cursor, TRAE and Claude Code CLI 2.1.311 all passed host tool
+discovery, preview/save, fresh-session recovery and cross-project rejection. Claude
+Code used a third-party model, so the result does not claim Anthropic model behavior.
+Kimi Code was not run because the available account quota was exhausted. No real
+project content or production database was used; longform behavior and clean-machine
+installation remain separate gates.
+
 Verification: 285 public-repository tests passed, including synthetic host profiles,
 Schema bootstrap, graph context and
 continuity tests plus real stdio calls. Existing subprocess tests use the active
 Python interpreter rather than assuming a checkout-local virtualenv. No package
-release, real Chat host test or production project import was performed.
+release, production project import or real-project host test was performed.
 
 2026-10-31 recovery parity batch: explicit manifests may be record-only but not
 empty; persisted task references accept the documented `type`/`record_id` names

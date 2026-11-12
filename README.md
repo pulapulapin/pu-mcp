@@ -32,7 +32,8 @@ PuKnowledge 在模型之外保存项目状态，让 Agent 每次先核对再继�
 PuKnowledge 是 MCP 服务，不绑定某一个聊天产品。本地 `stdio` 入口可供支持 MCP 的桌面 Agent 或 IDE 启动；HTTP 入口可用于受保护的远程部署或自建应用。不同宿主的工具发现、授权和 UI 行为可能不同，因此“协议兼容”不等于已经完成宿主验收。
 
 - 开发运行版已完成真实使用验证：当前本地 ChatGPT/Codex 插件环境；公开发行包仍需独立黑盒复验。
-- 可按 MCP 配置接入、仍需逐项验收：Codex CLI/IDE、Claude Code、Cursor、VS Code Agent 模式等。
+- 公开 `0.3.3` 代码已用合成项目完成 Cursor、TRAE 和 Claude Code CLI 2.1.311（第三方模型）的真实宿主工具验收；不代表真实业务项目、官方 Anthropic 模型或所有版本均已通过。
+- 仍需逐项验收：Codex CLI/IDE、Kimi Code、VS Code Agent 模式及其他宿主。
 - 可基于现有接口开发：独立小说/研究工作台、只读状态面板和自动检查任务。
 - 尚不适合：未经鉴权的公网服务、多租户团队 SaaS，以及依赖本机文件却没有本地执行能力的纯网页客户端。
 
