@@ -14,6 +14,13 @@ Boundary: no private project imports, runtime configs or manuscripts; synthetic
 fixtures only. No production channel restart, automatic main merge or release.
 See docs/design/story-planning.md for design and delivery boundaries.
 
+2026-11-12 product-value documentation batch: the public README now leads with
+the user problem, concrete benefits, a typical long-project workflow and honest
+host readiness. `docs/PRODUCT-VALUE.md` defines research, long-form writing,
+product-decision and cross-agent scenarios, distinguishes PuKnowledge from chat
+memory/files/RAG, and records pre-sales validation metrics. It contains no
+private project data and does not claim unverified host compatibility as passed.
+
 Verification: 266 public-repository tests passed, including Schema bootstrap, graph context and
 continuity tests plus real stdio calls. Existing subprocess tests use the active
 Python interpreter rather than assuming a checkout-local virtualenv. No package
