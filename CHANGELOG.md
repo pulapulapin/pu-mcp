@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Add explicit `--init-workspace` onboarding and read-only `--doctor` checks.
+  Initialization refuses overwrite, records one existing generic task workspace and
+  leaves project content/storage untouched; doctor reports READY/BLOCKED for config,
+  paths and existing SQLite integrity without creating a database.
 - Add read-only `project_storage_get` and `project_storage_preview` tools that
   calculate a project-local `.puknowledge/workspace.sqlite3` target, project-owned
   migration closure and global dependencies without copying data or changing routing.

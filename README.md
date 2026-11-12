@@ -55,13 +55,23 @@ git clone https://github.com/pulapulapin/pu-mcp.git
 cd pu-mcp
 python3 -m venv .venv
 .venv/bin/python -m pip install -e .
-cp config/workspace.example.json config/workspace.local.json
 .venv/bin/pu-knowledge-workbench \
-  --config config/workspace.local.json \
-  --check-config
+  --config ~/.config/puknowledge/workspace.json \
+  --init-workspace /absolute/path/to/your/project \
+  --project-id my-project \
+  --label "My Project" \
+  --domain research \
+  --enable-fs
+.venv/bin/pu-knowledge-workbench \
+  --config ~/.config/puknowledge/workspace.json \
+  --doctor
 ```
 
-`config/workspace.local.json` 使用本机路径，不应提交。相对路径以配置文件所在目录为基准。
+初始化只登记一个已经存在的目录并创建权限为当前用户可读写的配置文件；不会创建数据库、扫描项目内容或修改项目。`--doctor` 只读检查配置、路径、权限和已有 SQLite 的完整性，返回 `READY` 或 `BLOCKED`，但不能代替 MCP 宿主中的真实调用验收。
+
+如需手工配置，可复制 `config/workspace.example.json`。本机配置不应提交；相对路径以配置文件所在目录为基准。
+
+当前初始化命令创建的是通用 `task` 工作区，适合研究、产品和普通长期项目；它不会猜测小说结构或自动启用 `longform`。长篇项目仍应按已有项目格式和明确配置接入。
 
 ## MCP 配置
 
@@ -72,9 +82,7 @@ cp config/workspace.example.json config/workspace.local.json
       "command": "/absolute/path/to/pu-mcp/.venv/bin/pu-knowledge-workbench",
       "args": [
         "--config",
-        "/absolute/path/to/pu-mcp/config/workspace.local.json",
-        "--modules",
-        "core,fs,longform"
+        "~/.config/puknowledge/workspace.json"
       ]
     }
   }

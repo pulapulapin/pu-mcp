@@ -21,6 +21,15 @@ product-decision and cross-agent scenarios, distinguishes PuKnowledge from chat
 memory/files/RAG, and records pre-sales validation metrics. It contains no
 private project data and does not claim unverified host compatibility as passed.
 
+2026-11-12 onboarding batch completed: the public CLI now has explicit
+`--init-workspace` configuration creation and a read-only `--doctor` report.
+Initialization requires an existing directory and explicit project id/label,
+refuses overwrite, writes a 0600 config, and does not create a database or edit
+project content. Doctor checks config, projects, directory access and existing
+SQLite integrity, returning READY/BLOCKED without initializing storage. The
+initializer explicitly creates a generic `task` workspace and does not infer a
+longform project. Public full suite: 279 passed.
+
 Verification: 266 public-repository tests passed, including Schema bootstrap, graph context and
 continuity tests plus real stdio calls. Existing subprocess tests use the active
 Python interpreter rather than assuming a checkout-local virtualenv. No package

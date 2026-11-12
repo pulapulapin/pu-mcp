@@ -1,4 +1,4 @@
-import asyncio,json,os,sys,tempfile,unittest,subprocess
+import asyncio,json,os,sys,tempfile,unittest,subprocess,tomllib
 from pathlib import Path
 from unittest.mock import patch
 from mcp import ClientSession,StdioServerParameters
@@ -6,6 +6,65 @@ from mcp.client.stdio import stdio_client
 ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT/'scripts'))
 from novel_config import load_settings
 class KnowledgeEntryTests(unittest.TestCase):
+ def test_onboarding_module_is_packaged(self):
+  project=tomllib.loads((ROOT/'pyproject.toml').read_text())
+  self.assertIn('onboarding',project['tool']['setuptools']['py-modules'])
+
+ def run_entry(self,*args):
+  return subprocess.run([sys.executable,'-B',str(ROOT/'scripts/knowledge_entry.py'),*map(str,args)],capture_output=True,text=True)
+
+ def test_init_workspace_then_read_only_doctor(self):
+  with tempfile.TemporaryDirectory() as d:
+   root=Path(d);workspace=root/'my-project';workspace.mkdir();(workspace/'notes.md').write_text('synthetic')
+   config=root/'settings'/'workspace.json'
+   created=self.run_entry('--config',config,'--init-workspace',workspace,'--project-id','my-project','--label','My Project','--domain','research','--enable-fs')
+   self.assertEqual(created.returncode,0,created.stderr)
+   result=json.loads(created.stdout);self.assertEqual(result['state'],'CREATED');self.assertEqual(result['workspace_interface'],'task')
+   self.assertEqual(config.stat().st_mode & 0o777,0o600)
+   raw=json.loads(config.read_text());self.assertEqual(raw['modules'],['core','fs'])
+   self.assertEqual(raw['workspaces']['my-project']['path'],str(workspace.resolve()))
+   self.assertTrue(raw['workspaces']['my-project']['fs_read']['readonly'])
+   self.assertFalse((config.parent/'data').exists())
+   checked=self.run_entry('--config',config,'--doctor')
+   self.assertEqual(checked.returncode,0,checked.stderr)
+   report=json.loads(checked.stdout);self.assertTrue(report['ready']);self.assertEqual(report['state'],'READY')
+   self.assertEqual({x['id'] for x in report['checks']},{'config','data_dir','projects','workspace:my-project','database'})
+   self.assertFalse((config.parent/'data').exists(),'doctor must remain read-only')
+   asyncio.run(self.verify_onboarded_host(config))
+   duplicate=self.run_entry('--config',config,'--init-workspace',workspace,'--project-id','my-project','--label','My Project')
+   self.assertNotEqual(duplicate.returncode,0);self.assertIn('已存在',duplicate.stderr)
+   rejected=self.run_entry('--config',root/'other.json','--init-workspace',root/'absent','--project-id','other','--label','Other')
+   self.assertNotEqual(rejected.returncode,0);self.assertFalse((root/'other.json').exists())
+
+ async def verify_onboarded_host(self,config):
+  params=StdioServerParameters(command=sys.executable,args=['-B',str(ROOT/'scripts/knowledge_entry.py'),'--config',str(config)],env=os.environ.copy())
+  async with stdio_client(params) as (reader,writer):
+   async with ClientSession(reader,writer) as session:
+    await session.initialize();names={x.name for x in (await session.list_tools()).tools}
+    self.assertIn('workspace_guide',names);self.assertIn('fs_workspace_status',names)
+    listed=json.loads((await session.call_tool('workspace_list_projects',{})).content[0].text)
+    self.assertTrue(listed['ok'],listed);self.assertEqual(listed['result']['projects'][0]['id'],'my-project')
+
+ def test_doctor_blocks_missing_workspace_without_creating_it(self):
+  with tempfile.TemporaryDirectory() as d:
+   root=Path(d);missing=root/'missing';config=root/'config.json'
+   config.write_text(json.dumps({'data_dir':str(root/'data'),'workspaces':{'missing':{'path':str(missing),'label':'Missing','domain':'research'}}}))
+   checked=self.run_entry('--config',config,'--doctor')
+   self.assertEqual(checked.returncode,3,checked.stderr)
+   report=json.loads(checked.stdout);self.assertFalse(report['ready']);self.assertEqual(report['state'],'BLOCKED')
+   item=next(x for x in report['checks'] if x['id']=='workspace:missing')
+   self.assertEqual(item['status'],'failed');self.assertTrue(item['blocking'])
+   self.assertFalse(missing.exists());self.assertFalse((root/'data').exists())
+
+ def test_doctor_blocks_corrupt_existing_database(self):
+  with tempfile.TemporaryDirectory() as d:
+   root=Path(d);data=root/'data';data.mkdir();(data/'workspace.sqlite3').write_text('not sqlite')
+   config=root/'config.json';config.write_text(json.dumps({'data_dir':str(data),'workspaces':{'sample':{'path':str(root),'label':'Sample','domain':'research'}}}))
+   checked=self.run_entry('--config',config,'--doctor')
+   self.assertEqual(checked.returncode,3,checked.stderr)
+   report=json.loads(checked.stdout);database=next(x for x in report['checks'] if x['id']=='database')
+   self.assertEqual(database['status'],'failed');self.assertTrue(database['blocking'])
+
  def test_neutral_config_aliases_and_conflicts(self):
   with tempfile.TemporaryDirectory() as d:
    root=Path(d);p=root/'config.json';data={'workspaces':{'sample':{'path':str(root),'label':'Sample','domain':'research'}}};p.write_text(json.dumps(data))
