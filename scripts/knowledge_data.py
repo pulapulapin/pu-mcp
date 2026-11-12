@@ -22,6 +22,7 @@ class Knowledge:
   result=dict(row);result['body']=json.loads(row['body']);result['provenance']=json.loads(row['provenance']);return result
  def _access(self,db,project,dataset,write=False):
   self.w.project(project);row=self._row(db,'dataset',dataset,dataset);meta=row['body']
+  if write and getattr(self.w,'store_mode','shared')=='project' and meta['scope']=='global':raise ValueError('全局数据集依赖副本只读；请在中央库维护后同步项目库')
   if meta['scope']=='project' and meta['owner_project']!=project or write and meta['owner_project']!=project:raise ValueError('数据集不属于当前项目或只允许创建项目维护')
   return row
  def _evidence(self,db,project,meta,body):
@@ -38,6 +39,7 @@ class Knowledge:
   if normalized.get('status')=='confirmed' and owner_confirmed is not True:raise ValueError('confirmed必须明确owner_confirmed，不由用途推断')
   if kind=='dataset':
    if oid!=dataset:raise ValueError('数据集对象ID须等于dataset_id')
+   if getattr(self.w,'store_mode','shared')=='project' and normalized['scope']=='global':raise ValueError('项目库不能创建或修改全局数据集')
    if self.revision(dataset,db):
     old=self._access(db,project,dataset,True)['body']
     if old['purpose']!=normalized['purpose'] or old['scope']=='project' and normalized['scope']=='global':raise ValueError('不得改变用途或将私有历史公开；请另建数据集')
@@ -45,6 +47,8 @@ class Knowledge:
   meta=self._access(db,project,dataset,True)['body']
   if kind=='record':
    schema=self._row(db,'schema',dataset,normalized['record_type'],normalized['schema_revision']);validate_values(schema['body'],normalized['values']);self._evidence(db,project,meta,normalized)
+   from prompt_library import validate_prompt_record
+   validate_prompt_record(self,db,project,meta,oid,normalized)
   if kind=='relation':
    endpoints=[]
    for key in ('from','to'):
@@ -148,6 +152,8 @@ class Knowledge:
      try:
       if kind=='record':
        schema=self._row(db,'schema',dataset_id,body['record_type'],body['schema_revision']);validate_values(schema['body'],body['values']);self._evidence(db,project,meta,body)
+       from prompt_library import validate_prompt_record
+       validate_prompt_record(self,db,project,meta,row['object_id'],body)
        if not body['evidence']:warnings.append({'id':row['object_id'],'code':'missing_evidence'})
        for e in body['evidence']:
         source,_,_=self.w.evidence.access(db,e['source_id'],project,e['source_revision'])

@@ -3,6 +3,7 @@ import sqlite3
 import tempfile
 import unittest
 from concurrent.futures import ThreadPoolExecutor
+from contextlib import closing
 from pathlib import Path
 import sys
 sys.path.insert(0,str(Path(__file__).resolve().parent.parent / 'scripts'))
@@ -142,7 +143,7 @@ class StoreTests(unittest.TestCase):
     def test_unknown_schema_is_not_overwritten(self):
         with self.store.connection() as db:db.execute('PRAGMA user_version=99')
         with self.assertRaises(ValueError):Store(self.root / 'data')
-        with sqlite3.connect(self.store.path) as db:self.assertEqual(db.execute('PRAGMA user_version').fetchone()[0],99)
+        with closing(sqlite3.connect(self.store.path)) as db:self.assertEqual(db.execute('PRAGMA user_version').fetchone()[0],99)
     def test_project_path_escape_and_unconfigured_collection(self):
         with self.assertRaises(ValueError):self.w.context('../test','')
         with self.assertRaises(ValueError):self.w.index('/private')

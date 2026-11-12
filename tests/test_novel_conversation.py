@@ -34,6 +34,8 @@ class ConversationTests(unittest.TestCase):
   self.assertEqual(r['resume_mode'],'session_backup');self.assertEqual(r['task'],'处理长度上限')
   self.assertEqual(r['session_backup']['summary'],'第二轮');self.assertFalse(r['session_backup']['canon'])
   self.assertEqual(r['checkpoint']['task'],'旧任务')
+  self.assertTrue(r['checkpoint']['historical']);self.assertTrue(r['checkpoint']['content_omitted'])
+  self.assertNotIn('旧摘要',json.dumps(r,ensure_ascii=False))
   old=restarted.conversations.read('one','chat-one',1,first['fingerprint'],0,6000)
   self.assertEqual(json.loads(old['text'])['summary'],'保存工作上下文')
   self.assertEqual(restarted.conversations.list('one','chat-one')['total'],2)
@@ -114,6 +116,8 @@ class ConversationTests(unittest.TestCase):
   self.save(self.structured(),session='new')
   r=self.w.resume('one');self.assertEqual(r['stage'],'场景改编')
   self.assertEqual(r['checkpoint']['task'],'旧方向')
+  self.assertTrue(r['checkpoint']['content_omitted'])
+  self.assertNotIn('旧摘要',json.dumps(r,ensure_ascii=False))
   self.assertTrue(any('检查点' in w for w in r['task_selection']['warnings']))
  def test_stage_progress_legacy_late_save_and_context_share_direction(self):
   self.save(self.structured(stage='研究'),session='new')
@@ -167,7 +171,7 @@ class ConversationTests(unittest.TestCase):
  def test_real_protocol_new_process_resume_and_readonly_profile(self):asyncio.run(self.protocol())
  async def protocol(self):
   async def run(action):
-   params=StdioServerParameters(command=str(ROOT/'.venv/bin/python'),args=['-B',str(ROOT/'scripts/knowledge_entry.py'),'--modules','core,longform'],env=os.environ.copy(),cwd=str(self.root))
+   params=StdioServerParameters(command=sys.executable,args=['-B',str(ROOT/'scripts/knowledge_entry.py'),'--modules','core,longform'],env=os.environ.copy(),cwd=str(self.root))
    async with stdio_client(params) as (r,w):
     async with ClientSession(r,w) as client:
      await client.initialize();await action(client)

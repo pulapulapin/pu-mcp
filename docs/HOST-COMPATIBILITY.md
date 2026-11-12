@@ -1,0 +1,87 @@
+# 宿主兼容验证
+
+PuKnowledge 可以被不同 MCP 宿主启动，但“服务符合 MCP 协议”和“某个宿主中的真实用户体验通过”是两个不同验收层。
+
+当 Claude Code、Cursor 或其他目标宿主暂时不可用时，可以使用仓库提供的合成兼容探针，先验证公开服务本身的基础工作流：
+
+```bash
+puknowledge-compat --profile all
+```
+
+也可以单独执行一个档位：
+
+```bash
+puknowledge-compat --profile stdio-basic
+puknowledge-compat --profile tools-only
+puknowledge-compat --profile bounded-response --response-budget 12000
+puknowledge-compat --profile cached-tools
+puknowledge-compat --profile longform-basic
+```
+
+## 五种档位
+
+| 档位 | 主要验证 |
+| --- | --- |
+| `stdio-basic` | 初始化握手、工具与参数结构发现、项目发现、任务恢复、预览/保存、进程重启恢复、项目隔离 |
+| `tools-only` | 只依赖 MCP tools，不要求宿主支持 prompts、resources 或专用 App |
+| `bounded-response` | 记录工具响应字节数，并检查任务必需响应是否落在指定预算内 |
+| `cached-tools` | 服务模块改变后工具清单发生变化，证明沿用旧工具缓存会失真，客户端应刷新发现结果 |
+| `longform-basic` | 两个合成小说项目中的长文工具发现、交接快照与独立草稿预览/保存、非 Canon 标记、进程重启恢复、跨项目拒绝及项目 JSON 不变 |
+
+前三种档位还会通过 `fs` 模块列出并按 SHA-256 指纹读取一个合成文件。`longform-basic` 会创建两套最小合成小说 JSON 和临时 SQLite，保存的会话交接与草稿始终标记为非 Canon、未审批和未发布，并在重启后按固定版本恢复。所有保存都发生在系统临时目录中的合成 SQLite 数据库；命令不接受真实项目路径，也不会读取用户现有 PuKnowledge 配置。
+
+## 报告怎么读
+
+成功报告的顶层状态是 `PASS`，并固定包含：
+
+```json
+{
+  "state": "PASS",
+  "simulated": true,
+  "real_host_verified": false
+}
+```
+
+`PASS` 证明当前安装的公开 PuKnowledge 入口可以完成探针列出的协议流程。它不能证明：
+
+- Claude Code、Cursor 或其他真实宿主已经安装并成功连接；
+- 宿主 UI、授权、OAuth、工具确认弹窗或长内容呈现符合预期；
+- 宿主所用模型会在正确时机选择正确工具；
+- 某个真实项目的恢复内容、创作质量或业务结果已经通过。
+
+如需让真实宿主连接同一套持久合成夹具，可以执行：
+
+```bash
+puknowledge-compat --prepare-host ~/Documents/puknowledge-host-acceptance
+```
+
+输出包含绝对 `mcp.command` 和 `mcp.args`。目标目录必须不存在；命令不会覆盖目录、创建数据库或读取现有用户配置。后续真实宿主步骤见[外部用户首装验收](EXTERNAL-USER-ACCEPTANCE.md)。
+
+真实宿主可用后，仍应在不含私人内容的验收项目中重复：工具发现、明确选项目、恢复任务、读取准确来源、预览并保存、重开会话恢复、交叉项目拒绝。只有这些行为实际发生，才能把该宿主标记为已验收。
+
+## 2026-11-12 真实宿主验收
+
+维护者使用公开 `0.3.3` 代码和相互独立的合成数据库，手工完成了以下黑盒流程：宿主工具发现、只读任务恢复、预览后保存、全新会话精确恢复，以及使用相同会话 ID 跨项目读取时的拒绝。所有项目均标记为 `synthetic-host-test`，没有导入真实小说、研究资料或生产数据库。
+
+| 宿主 | 结果 | 已验证范围 | 限制 |
+| --- | --- | --- | --- |
+| Cursor | PASS | 工具发现、保存、跨 Chat 恢复、项目隔离、重复写入保护 | 一次成功保存后的重复请求被幂等保护拒绝，数据未被覆盖 |
+| TRAE | PASS | 工具发现、单次预览/保存、跨 Chat 恢复、项目隔离 | 仅合成项目 |
+| Claude Code CLI 2.1.311 | PASS | 宿主注册工具调用、单次预览/保存、全新 CLI 会话恢复、项目隔离 | 使用第三方模型；不代表 Anthropic 官方模型行为 |
+| Kimi Code | NOT RUN | 未执行 | 当前账户额度不足，不计为产品失败 |
+
+对不存在的跨项目显式会话，服务返回 `ok:false` 和“指定会话不存在；未回退其他任务”，且不包含来源项目内容。验收把这种明确拒绝与无任务的 `unassigned` 都视为隔离成立，但不会把错误响应伪装成成功读取。
+
+这些结果证明三种宿主能够使用公开 MCP 完成合成长期任务闭环。它们仍不证明真实项目资料恢复、`longform` 创作行为、文学质量、多用户安全、干净机器安装或未来宿主版本兼容。
+
+## 2026-11-12 干净环境安装验收
+
+公开仓库随后在全新 Python 3.14 临时虚拟环境中执行非 editable 构建安装。首次验收发现公开配置仍无条件导入未发布的私有游戏领域模块，导致安装成功后 `--doctor` 和 MCP 启动失败；源码测试因开发环境中存在该模块而没有暴露问题。
+
+修复后重新从仓库构建安装，以下项目通过：安装后的 `pu-knowledge-workbench --doctor`、安装后的 `puknowledge-compat --profile all` 五档流程，以及全部29个已安装包的依赖一致性检查。第五档在安装包中验证合成长文交接、独立草稿、重启恢复和项目隔离。公开配置现在明确拒绝非空 `game_repositories`，通用索引不再依赖私有 D&D 分类模块，并由静态打包依赖闭包测试防止类似遗漏回归。
+
+该验收仍是在维护者同一台 macOS 机器的临时环境完成，不等同于 Windows/Linux、其他 Python 版本或外部新用户安装通过。
+
+## 为什么仍然有价值
+
+探针能把问题分层。如果探针失败，优先修复服务端入口、工具定义、版本恢复、响应大小或隔离逻辑；如果探针通过而真实宿主失败，问题范围可收窄到宿主配置、缓存、权限、UI 或模型工具选择。这样不需要在目标客户端不可用时停止产品验证，也不会把模拟证据夸大成实机证据。

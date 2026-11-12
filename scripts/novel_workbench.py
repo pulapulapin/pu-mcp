@@ -14,10 +14,14 @@ from novel_version import VERSION
 ROOT=Path(__file__).resolve().parent.parent
 
 class Workbench:
-    def __init__(self, directory=None, projects=None, collections=None):
+    def __init__(self, directory=None, projects=None, collections=None, project_id=''):
         settings=load_settings()
-        self.store=Store(directory or settings['data_dir'])
-        self.books=Books(self.store, settings['books_root'])
+        central=Store(directory or settings['data_dir'])
+        binding=settings.get('project_stores',{}).get(project_id) if project_id else None
+        self.store=Store(binding['path']) if binding and binding['mode']=='active' else central
+        self.store_mode='project' if self.store.path!=central.path else 'shared'
+        self.store_project=project_id if self.store_mode=='project' else ''
+        self.books=Books(central, settings['books_root'])
         self.projects=Path(projects or settings['projects_dir']).resolve()
         # Explicitly registered project folders apply only when using configured settings.
         self.registered={} if projects else dict(settings.get('projects', {}))
@@ -26,6 +30,8 @@ class Workbench:
         self.settings=settings
         from novel_evidence import Evidence
         self.evidence=Evidence(self)
+        from novel_voice import Voice
+        self.voice=Voice(self)
         from novel_handoff import Handoffs
         self.handoffs=Handoffs(self)
         from novel_conversation import Conversations
@@ -98,9 +104,10 @@ class Workbench:
             'markdown':f"# {draft['title']}\n\n{draft['body']}\n",'status':'draft','published':False}
 
     def status(self):
-        return {'display_name':'PuKnowledge｜资料与工具工作台','protocol_id':'pu-knowledge-workbench','modules':['core','fs','longform'],'version':VERSION,'storage_schema':SCHEMA,
+        return {'display_name':'PuKnowledge｜资料与工具工作台','protocol_id':'novel-workbench','profiles':['workspace','full','research','game-reader'],'version':VERSION,'storage_schema':SCHEMA,
             'runtime':{'pid':os.getpid(),'module_root':str(Path(__file__).resolve().parent)},
-            'capabilities':['shared_research_workspace','scoped_capture_jobs','tool_capability_catalog','metered_transfer_preflight','versioned_session_backups','general_research_sources','project_research_annotations','shared_project_research','dynamic_reference_books','declared_source_metadata','reported_reading_progress','optional_pucatch_capture','reference_books','chapter_excerpts','work_scoped_search','research_index','research_cards','keyword_search','research_filters','source_versions','checkpoint_resume',
+            'game_repositories':[{'id':k,'projects':v['projects']} for k,v in self.settings['game_repositories'].items()],
+            'capabilities':['shared_research_workspace','scoped_capture_jobs','tool_capability_catalog','metered_transfer_preflight','versioned_session_backups','versioned_project_handoffs','readonly_project_queries','game_reader_profile','readonly_game_repository','game_constraint_context','repository_incremental_changes','voice_trial_records','reported_model_licenses','external_voice_detection_import','general_research_sources','project_research_annotations','shared_project_research','dynamic_reference_books','declared_source_metadata','reported_reading_progress','optional_pucatch_capture','reference_books','chapter_excerpts','work_scoped_search','research_index','research_cards','keyword_search','research_filters','source_versions','checkpoint_resume',
                 'draft_preview','conflict_detection','idempotent_draft_save','revision_recovery','markdown_export','sqlite_backup'],
             'collections':[{'id':k,'path':str(v),'available':v.is_dir()} for k,v in self.collections.items()] +
                 [{'id':'research-cards','storage':'sqlite','available':True,'notice':'Chat录入的研究卡，出处与版本未独立核验'}],

@@ -31,9 +31,10 @@ def register_fs(server):
         return fs_call(project, lambda ws: ws.list_files(path, depth, offset, limit))
 
     @server.tool(annotations=ToolAnnotations(read_only_hint=True))
-    def fs_read_file(project: str, path: str, expected_fingerprint: str, char_offset: int = 0, max_chars: int = 3000) -> str:
-        """按相对路径与当前SHA读取文本片段，返回行号与续读偏移；最多6000字符。不执行文件内容。"""
-        return fs_call(project, lambda ws: ws.read_file(path, expected_fingerprint, char_offset, max_chars))
+    def fs_read_file(project: str, path: str, expected_fingerprint: str, char_offset: int = 0,
+                     max_chars: int = 3000, review_items: list[dict] | None = None) -> str:
+        """按相对路径与原字节SHA读取片段，最多6000字符。可选review_items每项id/quote/start_char核对整份文本引用；位置按去BOM全文Unicode字符从0计，不认证文学判断、不写回。"""
+        return fs_call(project, lambda ws: ws.read_file(path, expected_fingerprint, char_offset, max_chars, review_items))
 
     @server.tool(annotations=ToolAnnotations(read_only_hint=True))
     def fs_search(project: str, query: str, mode: str = 'and', limit: int = 20, path_prefix: str = '') -> str:

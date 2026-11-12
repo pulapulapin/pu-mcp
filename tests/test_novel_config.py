@@ -32,7 +32,7 @@ class PortableConfigTests(unittest.TestCase):
         self.assertEqual(novel_mcp.resolve_project('test'),project)
         self.assertEqual(w.books.root,self.root/'books')
         self.assertEqual(w.collections,{'research':self.root/'refs'})
-        self.assertEqual(w.status()['version'],'0.3.3')
+        self.assertEqual(w.status()['version'],'0.4.0')
     def test_data_environment_override(self):
         self.write({'data_dir':'old'})
         with patch.dict(os.environ, {'NOVEL_WORKBENCH_DATA':str(self.root/'override')}):
@@ -41,6 +41,10 @@ class PortableConfigTests(unittest.TestCase):
         for data in ([],{'api_key':'unexpected'}, {'books_root':''},{'collections':[]},{'collections':{'../outside':'refs'}}):
             self.write(data)
             with self.assertRaises(ValueError):load_settings()
+    def test_public_package_rejects_private_game_extension_config(self):
+        self.write({'game_repositories': {'private': {}}})
+        with self.assertRaisesRegex(ValueError, '公开版不包含game领域扩展'):
+            load_settings()
     def test_missing_explicit_file_fails(self):
         with self.assertRaises(FileNotFoundError):load_settings()
     def test_registered_project_outside_projects_dir(self):
@@ -62,5 +66,22 @@ class PortableConfigTests(unittest.TestCase):
         (self.root/'projects').mkdir();(self.root/'external').mkdir()
         (self.root/'projects/escape').symlink_to(self.root/'external',target_is_directory=True)
         with self.assertRaises(ValueError):novel_mcp.resolve_project('escape')
+
+    def test_project_store_must_be_explicit_project_local_directory(self):
+        storylab = self.root / 'story' / '_storylab'; storylab.mkdir(parents=True)
+        self.write({'projects': {'story': str(storylab)},
+                    'project_stores': {'story': {
+                        'path': str(self.root / 'story' / '.puknowledge'), 'mode': 'shadow'}}})
+        settings = load_settings()
+        self.assertEqual(settings['project_stores']['story']['path'],
+                         self.root / 'story' / '.puknowledge')
+        self.assertEqual(settings['project_stores']['story']['mode'], 'shadow')
+        for entry in (
+                {'path': str(self.root / 'elsewhere'), 'mode': 'shadow'},
+                {'path': str(self.root / 'story' / '.puknowledge'), 'mode': 'unknown'}):
+            self.write({'projects': {'story': str(storylab)},
+                        'project_stores': {'story': entry}})
+            with self.assertRaises(ValueError):
+                load_settings()
 
 if __name__=='__main__':unittest.main()

@@ -27,6 +27,11 @@ BASE = ModuleSpec(
 )
 
 EXTENSIONS = {
+    'corpus': ModuleSpec(
+        module_id='corpus',
+        layer='extension',
+        purpose='配置文本集合的可重建索引、关键词检索与版本读取',
+    ),
     'fs': ModuleSpec(
         module_id='fs',
         layer='extension',
@@ -40,7 +45,7 @@ EXTENSIONS = {
 }
 
 AVAILABLE = (BASE.module_id, *EXTENSIONS)
-PUBLIC_MODULES = AVAILABLE
+PUBLIC_MODULES = ('core', 'corpus', 'fs', 'longform')
 
 
 def module_spec(module_id: str) -> ModuleSpec:

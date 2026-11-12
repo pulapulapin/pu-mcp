@@ -46,6 +46,17 @@ class WorkspaceFsTests(unittest.TestCase):
   page=self.fs.read_file(path,fp,0,20)
   self.assertIn('Alpha',page['text']);self.assertEqual(page['line_start'],1)
 
+ def test_read_supports_verified_review_anchors(self):
+  path='01-topics/review.md'
+  raw=b'first\nsecond line\n'
+  (self.ws/path).write_bytes(raw)
+  fp=hashlib.sha256(raw).hexdigest()
+  page=self.fs.read_file(path,fp,0,5,[{'id':'second','quote':'second line'}])
+  self.assertEqual(page['text'],'first')
+  self.assertTrue(page['review_check']['all_anchored'])
+  self.assertEqual(page['review_check']['items'][0]['start_line'],2)
+  self.assertFalse(page['review_check']['semantic_verified'])
+
  def test_search_and_and_or(self):
   and_hits=self.fs.search('商业化 盈利',mode='and')
   self.assertEqual(and_hits['total'],0)
