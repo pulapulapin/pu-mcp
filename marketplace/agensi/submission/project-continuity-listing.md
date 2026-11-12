@@ -29,7 +29,7 @@ session without relying on chat memory or mixing projects.
 
 **Compatibility note**
 
-Requires an independently installed PuKnowledge MCP 0.4.0+ with the `core`
+Requires an independently installed PuKnowledge MCP 0.3.3+ with the `core`
 module and task snapshot tools. Agensi delivers this workflow Skill; it does not
 install or host the local MCP server.
 
@@ -114,11 +114,12 @@ claim independent-user installation or real-project acceptance.
 
 ## Compatibility evidence
 
-The public 0.4.0 release candidate has completed synthetic-project real-host
-tool discovery, preview/save, fresh-session recovery and cross-project rejection
-on Cursor, TRAE and Claude Code CLI 2.1.311 using a third-party model. These are
+The public 0.3.3 base has completed synthetic-project real-host tool discovery,
+preview/save, fresh-session recovery and cross-project rejection on Cursor,
+TRAE and Claude Code CLI 2.1.311 using a third-party model. These are
 `real-host-synthetic-project` results, not independent external-user validation
-and not a claim about every model or host version.
+and not a claim about every model or host version. The 0.4.0 Alpha candidate is
+under review and is not required for this Starter workflow.
 
 Other MCP-capable hosts may work but must not be presented as verified until the
 same behavior has been tested there.
@@ -126,7 +127,8 @@ same behavior has been tested there.
 ## Limitations
 
 - PuKnowledge MCP must be installed and configured separately.
-- The current public package is an Alpha release candidate.
+- PuKnowledge remains Alpha software; the minimum supported public base for
+  this Starter is 0.3.3.
 - The Starter handles task continuity, not full longform or story-planning work.
 - `READY` proves the selected handoff was restored, not that its claims are true
   or approved.
@@ -176,6 +178,7 @@ the public package.
 
 ## Public links
 
+- Product page: https://pustudio.cc/puknowledge/
 - Repository: https://github.com/pulapulapin/pu-mcp
 - Release-candidate PR: https://github.com/pulapulapin/pu-mcp/pull/1
 - Documentation: https://github.com/pulapulapin/pu-mcp#readme

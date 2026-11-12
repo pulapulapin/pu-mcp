@@ -14,12 +14,12 @@ use_cases:
   - Recover the current task and next step after opening a new chat.
   - Verify that a saved handoff belongs to the selected project and revision.
   - Preview and save a non-Canon task handoff with explicit authorization.
-docs_url: https://github.com/pulapulapin/pu-mcp
+docs_url: https://pustudio.cc/puknowledge/
 ---
 
 # PuKnowledge Project Continuity Starter
 
-Requires: PuKnowledge MCP with the `core` module and the tools
+Requires: PuKnowledge MCP 0.3.3 or later with the `core` module and the tools
 `workspace_guide`, `workspace_list_projects`, `task_resume`,
 `task_preview_snapshot`, and `task_save_snapshot`.
 
@@ -79,3 +79,14 @@ or release readiness.
 This starter does not install PuKnowledge, create a cloud account, synchronize
 devices, evaluate prose, or make project decisions. A host that cannot run or
 reach the user's MCP cannot use this workflow.
+
+## Setup and removal
+
+Install and configure PuKnowledge separately from its public repository before
+using this Skill: https://github.com/pulapulapin/pu-mcp. Register only the
+projects the user intends to expose to the MCP. This Skill never edits the
+host's MCP configuration.
+
+Removing the Skill stops this workflow but does not delete PuKnowledge, project
+files or databases. Remove the MCP entry separately through the host's own MCP
+settings if the user also wants to disconnect PuKnowledge.
